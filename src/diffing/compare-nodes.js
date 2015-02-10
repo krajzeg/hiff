@@ -1,5 +1,7 @@
 var _ = require('underscore');
-var stringify = require('../display/stringify-node');
+var stringifyNode = require('../display/stringify-node');
+var node = require('../util/cheerio-utils').node;
+var colors = require('colors');
 
 module.exports = compareNodes;
 
@@ -20,8 +22,9 @@ function compareNodes($n1, $n2) {
   var diff;
   switch ($n1[0].type) {
     case 'text': diff = compareTextNodes($n1, $n2); break;
-    case 'tag':  diff = compareTags($n1, $n2); break;
-    case 'root': break;
+    case 'tag':
+    case 'root':
+      diff = compareTags($n1, $n2); break;
     default: throw new Error("Unrecognized node type: " + $n1[0].type);
   }
   if (diff) return diff;
@@ -58,8 +61,10 @@ function compareTags($n1, $n2) {
   // their children should also be identical to each other, so we recurse down
   var childPairs = _.zip($n1.contents(), $n2.contents());
   return _.chain(childPairs).map(function(pair) {
+    // create child nodes (with cheerio references)
     var child1 = pair[0], child2 = pair[1];
-    var $c1 = child1 && $1(child1), $c2 = child2 && $2(child2);
+    var $c1 = child1 && node($1, $1(child1));
+    var $c2 = child2 && node($2, $2(child2));
     return compareNodes($c1, $c2);
   }).find(function(difference) {
     return !!difference;

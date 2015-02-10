@@ -1,7 +1,6 @@
 var _ = require('underscore');
 var cheerio = require('cheerio');
-var colors = require('colors');
-
+var node = require('./util/cheerio-utils').node;
 var compareNodes = require('./diffing/compare-nodes');
 
 module.exports = {
@@ -13,10 +12,7 @@ function diff(expected, actual, options) {
   $1 = cheerio.load(expected);
   $2 = cheerio.load(actual);
 
-  var $root1 = $1.root(); $root1.cheerio = $1;
-  var $root2 = $2.root(); $root2.cheerio = $2;
-
   // start comparing them at the root nodes
-  return compareNodes($1.root(), $2.root());
+  return compareNodes(node($1, $1.root()), node($2, $2.root()));
 }
 
