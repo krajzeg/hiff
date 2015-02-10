@@ -4,7 +4,7 @@
   "description": "Diffing module that understands HTML and gives semantic information about what was changed.",
   "main": "src/hiff.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/mocha/bin/mocha test/**/*-tests.js"
   },
   "keywords": [
     "diff",
