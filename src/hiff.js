@@ -2,7 +2,9 @@ var _ = require('underscore');
 var cheerio = require('cheerio');
 var colors = require('colors');
 
-module.exports = diff;
+module.exports = {
+  diff: diff
+};
 
 function diff(expected, actual, options) {
   // parse both pieces of HTML with cheerio
