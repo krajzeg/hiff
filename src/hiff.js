@@ -10,6 +10,11 @@ module.exports = {
 };
 
 function diff(expected, actual, options) {
+  // sanitize the options object so we don't have to validate everything down the road
+  options = options || {};
+  if (typeof options.ignore == 'string')
+    options.ignore = [options.ignore];
+
   // parse both pieces of HTML with cheerio and get the root nodes
   $1 = cheerio.load(expected);
   $2 = cheerio.load(actual);
@@ -21,6 +26,6 @@ function diff(expected, actual, options) {
   prepareForDiff($n2);
 
   // compare the roots recursively
-  return compareNodes($n1, $n2);
+  return compareNodes($n1, $n2, options);
 }
 

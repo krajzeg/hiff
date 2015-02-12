@@ -25,7 +25,9 @@ function stringifyNode($node) {
       return n.data;
 
     default:
-      $node.html("...");
-      return $node.cheerio.html($node);
+      var $ = $node.cheerio;
+      $clone = $node.clone();
+      $clone.html("...");
+      return $.html($clone);
   }
 }
