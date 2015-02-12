@@ -16,6 +16,7 @@
   "license": "zlib",
   "devDependencies": {
     "chai": "^1.10.0",
+    "hiff": "git://github.com/krajzeg/hiff",
     "jshint": "^2.6.0",
     "mocha": "^2.1.0"
   },

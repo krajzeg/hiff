@@ -22,6 +22,7 @@ function compareNodes($n1, $n2) {
   var diff;
   switch ($n1[0].type) {
     case 'text': diff = compareTextNodes($n1, $n2); break;
+    case 'directive': diff = compareDirectives($n1, $n2); break;
     case 'tag':
     case 'root':
       diff = compareTags($n1, $n2); break;
@@ -74,6 +75,14 @@ function compareTags($n1, $n2) {
 function compareTextNodes($n1, $n2) {
   if ($n1.text() != $n2.text()) {
     return difference('different-text', $n1, $n2);
+  } else {
+    return false;
+  }
+}
+
+function compareDirectives($n1, $n2) {
+  if ($n1[0].data != $n2[0].data) {
+    return difference('different-directives', $n1, $n2);
   } else {
     return false;
   }

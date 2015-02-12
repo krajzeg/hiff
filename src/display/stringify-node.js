@@ -13,13 +13,19 @@ function stringifyNode($node) {
   if (!$node)
     return "[nothing]";
 
-  if ($node[0].type == 'text') {
-    var text = $node.text();
-    if (text.length > 40)
-      text = text.substring(0, 37) + "...";
-    return '"' + text + '"';
-  }
+  var n = $node[0];
+  switch(n.type) {
+    case 'text':
+      var text = $node.text();
+      if (text.length > 40)
+        text = text.substring(0, 37) + "...";
+      return '"' + text + '"';
 
-  $node.html("...");
-  return $node.cheerio.html($node);
+    case 'directive':
+      return n.data;
+
+    default:
+      $node.html("...");
+      return $node.cheerio.html($node);
+  }
 }
