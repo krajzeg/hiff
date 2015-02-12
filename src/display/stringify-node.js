@@ -9,7 +9,7 @@ module.exports = stringifyNode;
  * @param $node the cheerio object for the node
  * @returns {string} a printable string
  */
-function stringifyNode($, $node) {
+function stringifyNode($node) {
   if (!$node)
     return "[nothing]";
 
@@ -21,5 +21,5 @@ function stringifyNode($, $node) {
   }
 
   $node.html("...");
-  return $.html($node);
+  return $node.cheerio.html($node);
 }

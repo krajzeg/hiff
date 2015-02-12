@@ -80,8 +80,8 @@ function compareTextNodes($n1, $n2) {
 }
 
 function difference(type, $n1, $n2) {
-  var expected = "Expected: " + colors.green(stringifyNode($1, $n1)) + "\n";
-  var got = "Got:      " + colors.red(stringifyNode($2, $n2));
+  var expected = "Expected: " + colors.green(stringifyNode($n1)) + "\n";
+  var got = "Got:      " + colors.red(stringifyNode($n2));
 
   return type + "\n" + expected + got;
 }
