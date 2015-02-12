@@ -1,9 +1,27 @@
 var _ = require('underscore');
-var stringifyNode = require('../display/stringify-node');
 var node = require('../util/cheerio-utils').node;
 var colors = require('colors');
 
+var stringifyNode = require('../display/stringify-node');
+var canonicalizeText = require('../util/cheerio-utils').canonicalizeText;
+var canonicalizeAttribute = require('../util/cheerio-utils').canonicalizeAttribute;
+
 module.exports = compareNodes;
+
+var NodeType = {
+  ELEMENT_NODE: 1,
+  ATTRIBUTE_NODE: 2,
+  TEXT_NODE: 3,
+  CDATA_SECTION_NODE: 4,
+  ENTITY_REFERENCE_NODE: 5,
+  ENTITY_NODE: 6,
+  PROCESSING_INSTRUCTION_NODE: 7,
+  COMMENT_NODE: 8,
+  DOCUMENT_NODE: 9,
+  DOCUMENT_TYPE_NODE: 10,
+  DOCUMENT_FRAGMENT_NODE: 11,
+  NOTATION_NODE: 12
+};
 
 // ========================================================================================
 
@@ -20,13 +38,15 @@ function compareNodes($n1, $n2) {
 
   // compare the nodes using logic specific to their type
   var diff;
-  switch ($n1[0].type) {
-    case 'text': diff = compareTextNodes($n1, $n2); break;
-    case 'directive': diff = compareDirectives($n1, $n2); break;
-    case 'tag':
-    case 'root':
+  switch ($n1[0].nodeType) {
+    case NodeType.TEXT_NODE:
+      diff = compareTextNodes($n1, $n2); break;
+    case NodeType.ELEMENT_NODE:
       diff = compareTags($n1, $n2); break;
-    default: throw new Error("Unrecognized node type: " + $n1[0].type);
+    case NodeType.COMMENT_NODE:
+      return false; // ignore comments for now
+    default:
+      throw new Error("Unrecognized node type: " + $n1[0].type + ", " + $n1[0].nodeType);
   }
   if (diff) return diff;
 
@@ -45,8 +65,8 @@ function compareTags($n1, $n2) {
   var attributes = _.uniq(attributesOnNode1.concat(attributesOnNode2));
 
   var attributeDifference = _.chain(attributes).map(function(attribute) {
-    var value1 = $n1[0].attribs[attribute];
-    var value2 = $n2[0].attribs[attribute];
+    var value1 = canonicalizeAttribute($n1[0].attribs[attribute]);
+    var value2 = canonicalizeAttribute($n2[0].attribs[attribute]);
     if (value1 === undefined)
       return difference('extra-attribute', $n1, $n2, {attribute: attribute});
     if (value2 === undefined)
@@ -73,7 +93,9 @@ function compareTags($n1, $n2) {
 }
 
 function compareTextNodes($n1, $n2) {
-  if ($n1.text() != $n2.text()) {
+  var t1 = canonicalizeText($n1.text());
+  var t2 = canonicalizeText($n2.text());
+  if (t1 != t2) {
     return difference('different-text', $n1, $n2);
   } else {
     return false;
@@ -94,5 +116,3 @@ function difference(type, $n1, $n2) {
 
   return type + "\n" + expected + got;
 }
-
-
