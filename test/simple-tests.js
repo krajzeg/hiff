@@ -2,7 +2,7 @@ var diff = require('../src/hiff').diff;
 var assert = require('chai').assert;
 
 
-describe("Hiff", function () {
+describe("Hiff at the very least", function () {
   it("should report no changes for identical HTML", function () {
     var html = "<div>Hello!</div>";
     var d = diff(html, html);
