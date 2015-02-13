@@ -23,6 +23,7 @@
   "dependencies": {
     "cheerio": "^0.18.0",
     "colors": "^1.0.3",
+    "diff": "^1.2.2",
     "underscore": "^1.7.0"
   }
 }
