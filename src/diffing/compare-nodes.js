@@ -31,69 +31,6 @@ var DiffLevel = {
 
 // ========================================================================================
 
-function compareNodeLists($parent, list1, list2, options) {
-  var pairs = _.zip(list1, list2);
-  var changes = [], done = false;
-
-  _.each(pairs, function(pair, index) {
-    // this flag might be set if we went into recursive mode
-    // (_.each is just less convenient than loops, can't return from outer func)
-    if (done) return;
-
-    // extract nodes
-    var $n1 = pair[0], $n2 = pair[1];
-
-    // if one of the nodes is missing, it's an easy case
-    if (!$n1) {
-      changes.push(changeTypes.added($parent, $n2));
-      return;
-    }
-    if (!$n2) {
-      changes.push(changeTypes.removed($parent, $n1));
-      return;
-    }
-
-    // now, we need to compare
-    var comparison = compareNodes($n1, $n2, options);
-    if (comparison) {
-      // there is a difference, but our behavior depends on how serious it is
-      // if the node is recognizable as 'the same thing', we just store the
-      // changes - but if it's not, we try to determine what was added/removed
-      if (comparison.level == DiffLevel.SAME_BUT_DIFFERENT) {
-        // same node with alterations - store the differences
-        changes = changes.concat(comparison.changes);
-      } else if (comparison.level == DiffLevel.NOT_THE_SAME_NODE) {
-        // either something was added or something was removed
-        // compare how many differences we have in each scenario and pick the better matching one
-        var addedSub1 = list1.slice(index), addedSub2 = list2.slice(index+1);
-        var removedSub1 = list1.slice(index+1), removedSub2 = list2.slice(index);
-
-        var changesIfAdded = compareNodeLists($parent, addedSub1, addedSub2);
-        var changesIfRemoved = compareNodeLists($parent, removedSub1, removedSub2);
-
-        // pick the scenario which cause the least amount of changes and return
-        // (since our recursion dealt with the whole remainder of the list)
-        if (changesIfAdded.length < changesIfRemoved.length) {
-          changes = changes.concat(
-            [changeTypes.added($parent, $n2)],
-            changesIfAdded
-          );
-        } else {
-          changes = changes.concat(
-            [changeTypes.removed($parent, $n1)],
-            changesIfRemoved
-          );
-        }
-
-        // we have recursively processed the whole list, so we skip the rest of the iteration
-        done = true;
-      }
-    }
-  });
-
-  // end of the list, we're done
-  return changes;
-}
 
 function compareNodes($n1, $n2, options) {
 
@@ -148,10 +85,11 @@ function compareNodes($n1, $n2, options) {
     });
 
     // if the inner HMTL is different, it counts as a dissimilarity point too
-    if ($n1.html() != $n2.html())
+    // which might tip us over into thinking it's a completely new node
+    if ((dissimilarity == 1) && ($n1.html() != $n2.html()))
       dissimilarity++;
 
-    // if we have at least two differences, we assume this node is completely different
+    // if we have at least two differences, we assume those are completely different nodes
     if (dissimilarity >= 2)
     return {
       level: DiffLevel.NOT_THE_SAME_NODE,
@@ -180,6 +118,71 @@ function compareNodes($n1, $n2, options) {
       return node($n2.cheerio, n);
     });
     return compareNodeLists($n1, list1, list2, options);
+  }
+
+
+  function compareNodeLists($parent, list1, list2, options) {
+    var pairs = _.zip(list1, list2);
+    var changes = [], done = false;
+
+    _.each(pairs, function(pair, index) {
+      // this flag might be set if we went into recursive mode
+      // (_.each is just less convenient than loops, can't return from outer func)
+      if (done) return;
+
+      // extract nodes
+      var $n1 = pair[0], $n2 = pair[1];
+
+      // if one of the nodes is missing, it's an easy case
+      if (!$n1) {
+        changes.push(changeTypes.added($parent, $n2));
+        return;
+      }
+      if (!$n2) {
+        changes.push(changeTypes.removed($parent, $n1));
+        return;
+      }
+
+      // now, we need to compare
+      var comparison = compareNodes($n1, $n2, options);
+      if (comparison) {
+        // there is a difference, but our behavior depends on how serious it is
+        // if the node is recognizable as 'the same thing', we just store the
+        // changes - but if it's not, we try to determine what was added/removed
+        if (comparison.level == DiffLevel.SAME_BUT_DIFFERENT) {
+          // same node with alterations - store the differences
+          changes = changes.concat(comparison.changes);
+        } else if (comparison.level == DiffLevel.NOT_THE_SAME_NODE) {
+          // either something was added or something was removed
+          // compare how many differences we have in each scenario and pick the better matching one
+          var addedSub1 = list1.slice(index), addedSub2 = list2.slice(index+1);
+          var removedSub1 = list1.slice(index+1), removedSub2 = list2.slice(index);
+
+          var changesIfAdded = compareNodeLists($parent, addedSub1, addedSub2);
+          var changesIfRemoved = compareNodeLists($parent, removedSub1, removedSub2);
+
+          // pick the scenario which cause the least amount of changes and return
+          // (since our recursion dealt with the whole remainder of the list)
+          if (changesIfAdded.length < changesIfRemoved.length) {
+            changes = changes.concat(
+              [changeTypes.added($parent, $n2)],
+              changesIfAdded
+            );
+          } else {
+            changes = changes.concat(
+              [changeTypes.removed($parent, $n1)],
+              changesIfRemoved
+            );
+          }
+
+          // we have recursively processed the whole list, so we skip the rest of the iteration
+          done = true;
+        }
+      }
+    });
+
+    // end of the list, we're done
+    return changes;
   }
 
   function compareTextNodes($n1, $n2) {
