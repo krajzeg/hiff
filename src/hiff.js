@@ -4,9 +4,14 @@ var node = require('./util/cheerio-utils').node;
 
 var compareNodes = require('./diffing/compare-nodes');
 var prepareForDiff = require('./diffing/prepare-for-diff');
+var changeTypes = require('./diffing/change-types');
 
 module.exports = {
-  diff: diff
+  diff: diff,
+
+  added: changeTypes.added,
+  removed: changeTypes.removed,
+  changed: changeTypes.changed
 };
 
 function diff(expected, actual, options) {

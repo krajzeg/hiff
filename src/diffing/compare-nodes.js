@@ -33,9 +33,14 @@ var DiffLevel = {
 
 function compareNodeLists($parent, list1, list2, options) {
   var pairs = _.zip(list1, list2);
-  var changes = [];
+  var changes = [], done = false;
 
   _.each(pairs, function(pair, index) {
+    // this flag might be set if we went into recursive mode
+    // (_.each is just less convenient than loops, can't return from outer func)
+    if (done) return;
+
+    // extract nodes
     var $n1 = pair[0], $n2 = pair[1];
 
     // if one of the nodes is missing, it's an easy case
@@ -69,16 +74,19 @@ function compareNodeLists($parent, list1, list2, options) {
         // pick the scenario which cause the least amount of changes and return
         // (since our recursion dealt with the whole remainder of the list)
         if (changesIfAdded.length < changesIfRemoved.length) {
-          return changes.concat(
-            [changeTypes.added($context, $n2)],
+          changes = changes.concat(
+            [changeTypes.added($parent, $n2)],
             changesIfAdded
           );
         } else {
-          return changes.concat(
-            [changeTypes.removed($context, $n1)],
+          changes = changes.concat(
+            [changeTypes.removed($parent, $n1)],
             changesIfRemoved
           );
         }
+
+        // we have recursively processed the whole list, so we skip the rest of the iteration
+        done = true;
       }
     }
   });
@@ -103,26 +111,25 @@ function compareNodes($n1, $n2, options) {
     }
 
     // compare the nodes using logic specific to their type
-    var diff;
     switch ($n1[0].nodeType) {
       case NodeType.TEXT_NODE:
-        diff = compareTextNodes($n1, $n2); break;
+        return compareTextNodes($n1, $n2);
       case NodeType.ELEMENT_NODE:
-        diff = compareTags($n1, $n2); break;
+        return compareTags($n1, $n2);
       case NodeType.COMMENT_NODE:
         return false; // ignore comments for now
       default:
         throw new Error("Unrecognized node type: " + $n1[0].type + ", " + $n1[0].nodeType);
     }
-    return diff;
   }
 
   function compareTags($n1, $n2) {
-    var changeCount = 0;
+    var changes = [], dissimilarity = 0;
 
     // if the tags have different names, they're not very similar
     if ($n1[0].name != $n2[0].name) {
-      changeCount++;
+      changes.push(changeTypes.changed($n1, $n2));
+      dissimilarity++;
     }
 
     // they should have the same attributes too
@@ -130,34 +137,38 @@ function compareNodes($n1, $n2, options) {
     var attributesOnNode2 = _.keys($n2[0].attribs);
     var attributes = _.uniq(attributesOnNode1.concat(attributesOnNode2));
 
-    _.map(attributes, function(attribute) {
+    _.map(attributes, function (attribute) {
       var value1 = canonicalizeAttribute($n1[0].attribs[attribute]);
       var value2 = canonicalizeAttribute($n2[0].attribs[attribute]);
-      if (value1 != value2)
-        changeCount++;
+      if (value1 != value2) {
+        dissimilarity++;
+        if (!changes.length)
+          changes.push(changeTypes.changed($n1, $n2));
+      }
     });
 
-    // return changes if we have any by this point
-    if (changeCount >= 2) {
-      return {
-        level: DiffLevel.NOT_THE_SAME_NODE,
-        changes: [changeTypes.changed($n1, $n2)]
-      };
-    } else if (changeCount >= 1) {
+    // if the inner HMTL is different, it counts as a dissimilarity point too
+    if ($n1.html() != $n2.html())
+      dissimilarity++;
+
+    // if we have at least two differences, we assume this node is completely different
+    if (dissimilarity >= 2)
+    return {
+      level: DiffLevel.NOT_THE_SAME_NODE,
+      changes: changes
+    };
+
+    // otherwise, we compare the children too, and return all the changes aggregated
+    var childChanges = compareChildren($n1, $n2, options);
+    changes = changes.concat(childChanges);
+
+    if (changes.length) {
       return {
         level: DiffLevel.SAME_BUT_DIFFERENT,
-        changes: [changeTypes.changed($n1,$n2)].concat(compareChildren($n1, $n2, options))
+        changes: changes
       };
     } else {
-      var childChanges = compareChildren($n1, $n2, options);
-      if (childChanges.length > 0) {
-        return {
-          level: DiffLevel.SAME_BUT_DIFFERENT,
-          changes: childChanges
-        };
-      } else {
-        return false;
-      }
+      return false;
     }
   }
 

@@ -19,7 +19,7 @@ function change($contextNode, changeObject) {
 
 function added($context, $node) {
   return change($context, {
-    type: added,
+    type: 'added',
     node: $node,
     message: "Added: " + colors.green(stringify($node))
   });
@@ -27,7 +27,7 @@ function added($context, $node) {
 
 function removed($context, $node) {
   return change($context, {
-    type: removed,
+    type: 'removed',
     node: $node,
     message: "Removed: " + colors.red(stringify($node))
   });
@@ -35,7 +35,7 @@ function removed($context, $node) {
 
 function changed($before, $after) {
   return change($before, {
-    type: changed,
+    type: 'changed',
     oldNode: $before,
     newNode: $after,
     message: "Changed: " + coloredChanges(stringify($before), stringify($after))
@@ -46,6 +46,6 @@ function coloredChanges(beforeStr, afterStr) {
   var parts = diff.diffChars(beforeStr, afterStr);
   return _.map(parts, function(part) {
     var color = part.added ? 'green' : (part.removed ? 'red' : 'grey');
-    return colors[color](part);
+    return colors[color](part.value);
   }).join("");
 }
