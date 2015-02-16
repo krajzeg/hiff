@@ -77,11 +77,13 @@ function compareNodes($n1, $n2, options) {
 
   function compareTags($n1, $n2) {
     var changes = [];
-    var possibleChanges = 1;
+    var foundChanges = 0, possibleChanges = 0;
 
     // if the tags have different names, they're not very similar
+    possibleChanges++;
     if ($n1[0].name != $n2[0].name) {
       changes.push(changeTypes.changed($n1, $n2));
+      foundChanges++;
     }
 
     // they should have the same attributes too
@@ -94,15 +96,21 @@ function compareNodes($n1, $n2, options) {
       var value1 = canonicalizeAttribute($n1[0].attribs[attribute]);
       var value2 = canonicalizeAttribute($n2[0].attribs[attribute]);
       if (value1 != value2) {
-        if (!changes.length)
+        foundChanges++;
+        if (!changes.length) {
           changes.push(changeTypes.changed($n1, $n2));
+        }
       }
     });
 
     // we compare the children too, and return all the changes aggregated
-    possibleChanges += _.max([$n1.contents().length, $n2.contents().length]);
+    possibleChanges += $n1.contents().length + $n2.contents().length;
     var childChanges = compareChildren($n1, $n2, options);
     changes = changes.concat(childChanges);
+
+    foundChanges += _.filter(childChanges, function(change) {
+      return (change.in == $n1 || change.in == $n2);
+    }).length;
 
     // no changes?
     if (!changes.length)

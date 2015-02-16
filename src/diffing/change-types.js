@@ -41,7 +41,7 @@ function removed($context, $node) {
 }
 
 function changed($before, $after) {
-  return change($before.parent(), {
+  return change($before, {
     type: 'changed',
     oldNode: $before,
     newNode: $after,
