@@ -36,4 +36,3 @@ function diff(expected, actual, options) {
   // compare the roots recursively
   return compareNodes($n1, $n2, options);
 }
-
