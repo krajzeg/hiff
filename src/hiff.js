@@ -20,6 +20,9 @@ function diff(expected, actual, options) {
   if (typeof options.ignore == 'string')
     options.ignore = [options.ignore];
 
+  // make a place to store memoized comparison results
+  options.memo = {};
+
   // parse both pieces of HTML with cheerio and get the root nodes
   $1 = cheerio.load(expected);
   $2 = cheerio.load(actual);

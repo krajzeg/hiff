@@ -29,12 +29,27 @@ var DiffLevel = require('./change-types').DiffLevel;
 
 function compareNodes($n1, $n2, options) {
 
+  var key = $n1[0].__uid + ':' + $n2[0].__uid;
+
+  // do we have a memoized result?
+  if (options.memo && (options.memo[key] !== undefined)) {
+    return options.memo[key];
+  }
+
+  // should we ignore the comparison completely?
   if (options.ignore) {
     if (isIgnored($n1) && isIgnored($n2))
       return false;
   }
 
-  return findDifferences($n1, $n2);
+  // compare and memoize result
+  var result = findDifferences($n1, $n2);
+  if (options.memo) {
+    options.memo[key] = result;
+  }
+
+  // return
+  return result;
 
   // ==========================================================================================
 

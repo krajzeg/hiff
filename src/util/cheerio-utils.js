@@ -5,6 +5,11 @@ module.exports = {
       $node = $($node);
     }
     $node.cheerio = $;
+
+    // assign a random UID to each node
+    if (!$node[0].__uid)
+      $node[0].__uid = Math.random().toString().substring(2);
+
     return $node;
   },
 
