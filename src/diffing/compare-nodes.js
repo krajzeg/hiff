@@ -76,50 +76,45 @@ function compareNodes($n1, $n2, options) {
   }
 
   function compareTags($n1, $n2) {
-    var changes = [], dissimilarity = 0;
+    var changes = [];
+    var possibleChanges = 1;
 
     // if the tags have different names, they're not very similar
     if ($n1[0].name != $n2[0].name) {
       changes.push(changeTypes.changed($n1, $n2));
-      dissimilarity++;
     }
 
     // they should have the same attributes too
     var attributesOnNode1 = _.keys($n1[0].attribs);
     var attributesOnNode2 = _.keys($n2[0].attribs);
     var attributes = _.uniq(attributesOnNode1.concat(attributesOnNode2));
+    possibleChanges += attributes.length;
 
     _.map(attributes, function (attribute) {
       var value1 = canonicalizeAttribute($n1[0].attribs[attribute]);
       var value2 = canonicalizeAttribute($n2[0].attribs[attribute]);
       if (value1 != value2) {
-        dissimilarity++;
         if (!changes.length)
           changes.push(changeTypes.changed($n1, $n2));
       }
     });
 
-    // if we have at least two differences, we assume those are completely different nodes
-    if (dissimilarity >= 2)
-    return {
-      level: DiffLevel.NOT_THE_SAME_NODE,
-      changes: changes
-    };
-
-    // otherwise, we compare the children too, and return all the changes aggregated
+    // we compare the children too, and return all the changes aggregated
+    possibleChanges += _.max([$n1.contents().length, $n2.contents().length]);
     var childChanges = compareChildren($n1, $n2, options);
     changes = changes.concat(childChanges);
-    if (childChanges.length)
-      dissimilarity++;
 
-    if (changes.length) {
-      return {
-        level: dissimilarity >= 2 ? DiffLevel.NOT_THE_SAME_NODE : DiffLevel.SAME_BUT_DIFFERENT,
-        changes: changes
-      };
-    } else {
+    // no changes?
+    if (!changes.length)
       return false;
-    }
+
+    // determine similarity to find out if this is the same node, or completely different
+    var similarity = 1.0 - (changes.length / possibleChanges);
+    var level = (similarity < 0.5) ? DiffLevel.NOT_THE_SAME_NODE : DiffLevel.SAME_BUT_DIFFERENT;
+    return {
+      level: level,
+      changes: changes
+    };
   }
 
   function compareChildren($n1, $n2, options) {

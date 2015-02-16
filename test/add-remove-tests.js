@@ -64,12 +64,12 @@ describe("Removing tags", function () {
 
 describe("Multiple additions/removals", function() {
   it("should be correctly recognized", function() {
-    var html1 = "<div> <b>1</b> <br> <br> <i>2</i> <p>3</p> </div>";
-    var html2 = "<div> <a>added</a> <b>1</b> <i>2</i> <strong>Hello</strong> <em>Hi!</em> <p>3</p> <em>Done.</em></div>";
+    var html1 = "<div id='multi'> <b>1</b> <br> <i>2</i> <p>3</p> <b>4</b> <a>5</a> </div>";
+    var html2 = "<div id='multi'> <a>added</a> <b>1</b> <i>2</i> <strong>Hello</strong> <em>Hi!</em> <p>3</p> <b>4</b> <a>5</a> <em>Done.</em></div>";
     var diff = hiff.diff(html1, html2);
     var changeTypes = _.pluck(diff.changes, 'type');
-    assert.deepEqual(changeTypes, ['added', 'removed', 'removed', 'added', 'added', 'added']);
+    assert.deepEqual(changeTypes, ['added', 'removed', 'added', 'added', 'added']);
     var tags = _.chain(diff.changes).pluck('node').pluck(0).pluck('name').value();
-    assert.deepEqual(tags, ['a', 'br', 'br', 'strong', 'em', 'em']);
+    assert.deepEqual(tags, ['a', 'br', 'strong', 'em', 'em']);
   });
 });
