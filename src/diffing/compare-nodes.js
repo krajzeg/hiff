@@ -29,6 +29,11 @@ var DiffLevel = require('./change-types').DiffLevel;
 
 function compareNodes($n1, $n2, options) {
 
+  if (options.ignore) {
+    if (isIgnored($n1) && isIgnored($n2))
+      return false;
+  }
+
   return findDifferences($n1, $n2);
 
   // ==========================================================================================
@@ -115,7 +120,7 @@ function compareNodes($n1, $n2, options) {
 
   function compareNodeLists($parent, list1, list2, options) {
     var nodeDiff = require('./node-list-diff');
-    var parts = nodeDiff.diffLists(list1, list2);
+    var parts = nodeDiff.diffLists(list1, list2, options);
 
     // map the result from the diff module to something matching our needs
     var index1 = 0, index2 = 0, changes = [];
@@ -125,7 +130,7 @@ function compareNodes($n1, $n2, options) {
         var nodesToCheck = _.zip(list1.slice(index1, index1 + part.count), list2.slice(index2, index2 + part.count));
         index1 += part.count; index2 += part.count;
         _.each(nodesToCheck, function(pair) {
-          var nodeCompare = compareNodes(pair[0], pair[1]);
+          var nodeCompare = compareNodes(pair[0], pair[1], options);
           if (nodeCompare) {
             changes = changes.concat(nodeCompare.changes);
           }
