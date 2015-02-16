@@ -6,7 +6,12 @@ var stringify = require('../display/stringify-node');
 module.exports = {
   added: added,
   removed: removed,
-  changed: changed
+  changed: changed,
+
+  DiffLevel: {
+    SAME_BUT_DIFFERENT: 'same_but_different',
+    NOT_THE_SAME_NODE: 'not_the_same_node'
+  }
 };
 
 // ==========================================================

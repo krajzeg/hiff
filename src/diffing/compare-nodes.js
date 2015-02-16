@@ -1,8 +1,6 @@
 var _ = require('underscore');
 var node = require('../util/cheerio-utils').node;
-var colors = require('colors');
 
-var stringifyNode = require('../display/stringify-node');
 var canonicalizeText = require('../util/cheerio-utils').canonicalizeText;
 var canonicalizeAttribute = require('../util/cheerio-utils').canonicalizeAttribute;
 var changeTypes = require('./change-types');
@@ -24,10 +22,7 @@ var NodeType = {
   NOTATION_NODE: 12
 };
 
-var DiffLevel = {
-  SAME_BUT_DIFFERENT: 'same_but_different',
-  NOT_THE_SAME_NODE: 'not_the_same_node'
-};
+var DiffLevel = require('./change-types').DiffLevel;
 
 // ========================================================================================
 
@@ -84,11 +79,6 @@ function compareNodes($n1, $n2, options) {
       }
     });
 
-    // if the inner HMTL is different, it counts as a dissimilarity point too
-    // which might tip us over into thinking it's a completely new node
-    if ((dissimilarity == 1) && ($n1.html() != $n2.html()))
-      dissimilarity++;
-
     // if we have at least two differences, we assume those are completely different nodes
     if (dissimilarity >= 2)
     return {
@@ -99,10 +89,12 @@ function compareNodes($n1, $n2, options) {
     // otherwise, we compare the children too, and return all the changes aggregated
     var childChanges = compareChildren($n1, $n2, options);
     changes = changes.concat(childChanges);
+    if (childChanges.length)
+      dissimilarity++;
 
     if (changes.length) {
       return {
-        level: DiffLevel.SAME_BUT_DIFFERENT,
+        level: dissimilarity >= 2 ? DiffLevel.NOT_THE_SAME_NODE : DiffLevel.SAME_BUT_DIFFERENT,
         changes: changes
       };
     } else {
@@ -122,62 +114,34 @@ function compareNodes($n1, $n2, options) {
 
 
   function compareNodeLists($parent, list1, list2, options) {
-    var pairs = _.zip(list1, list2);
-    var changes = [], done = false;
+    var nodeDiff = require('./node-list-diff');
+    var parts = nodeDiff.diffLists(list1, list2);
 
-    _.each(pairs, function(pair, index) {
-      // this flag might be set if we went into recursive mode
-      // (_.each is just less convenient than loops, can't return from outer func)
-      if (done) return;
-
-      // extract nodes
-      var $n1 = pair[0], $n2 = pair[1];
-
-      // if one of the nodes is missing, it's an easy case
-      if (!$n1) {
-        changes.push(changeTypes.added($parent, $n2));
-        return;
-      }
-      if (!$n2) {
-        changes.push(changeTypes.removed($parent, $n1));
-        return;
-      }
-
-      // now, we need to compare
-      var comparison = compareNodes($n1, $n2, options);
-      if (comparison) {
-        // there is a difference, but our behavior depends on how serious it is
-        // if the node is recognizable as 'the same thing', we just store the
-        // changes - but if it's not, we try to determine what was added/removed
-        if (comparison.level == DiffLevel.SAME_BUT_DIFFERENT) {
-          // same node with alterations - store the differences
-          changes = changes.concat(comparison.changes);
-        } else if (comparison.level == DiffLevel.NOT_THE_SAME_NODE) {
-          // either something was added or something was removed
-          // compare how many differences we have in each scenario and pick the better matching one
-          var addedSub1 = list1.slice(index), addedSub2 = list2.slice(index+1);
-          var removedSub1 = list1.slice(index+1), removedSub2 = list2.slice(index);
-
-          var changesIfAdded = compareNodeLists($parent, addedSub1, addedSub2);
-          var changesIfRemoved = compareNodeLists($parent, removedSub1, removedSub2);
-
-          // pick the scenario which cause the least amount of changes and return
-          // (since our recursion dealt with the whole remainder of the list)
-          if (changesIfAdded.length < changesIfRemoved.length) {
-            changes = changes.concat(
-              [changeTypes.added($parent, $n2)],
-              changesIfAdded
-            );
-          } else {
-            changes = changes.concat(
-              [changeTypes.removed($parent, $n1)],
-              changesIfRemoved
-            );
+    // map the result from the diff module to something matching our needs
+    var index1 = 0, index2 = 0, changes = [];
+    _.each(parts, function(part) {
+      // unchanged parts
+      if (!part.added && !part.removed) {
+        var nodesToCheck = _.zip(list1.slice(index1, index1 + part.count), list2.slice(index2, index2 + part.count));
+        index1 += part.count; index2 += part.count;
+        _.each(nodesToCheck, function(pair) {
+          var nodeCompare = compareNodes(pair[0], pair[1]);
+          if (nodeCompare) {
+            changes = changes.concat(nodeCompare.changes);
           }
-
-          // we have recursively processed the whole list, so we skip the rest of the iteration
-          done = true;
-        }
+        });
+      } else if (part.added) {
+        var addedNodes = list2.slice(index2, index2 + part.count);
+        index2 += part.count;
+        changes = changes.concat(addedNodes.map(function(node) {
+          return changeTypes.added($parent, node);
+        }));
+      } else if (part.removed) {
+        var removedNodes = list1.slice(index1, index1 + part.count);
+        index1 += part.count;
+        changes = changes.concat(removedNodes.map(function(node) {
+          return changeTypes.removed($parent, node);
+        }));
       }
     });
 
