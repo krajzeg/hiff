@@ -8,6 +8,7 @@ module.exports = {
   added: added,
   removed: removed,
   changed: changed,
+  changedText: changedText,
 
   DiffLevel: {
     SAME_BUT_DIFFERENT: 'same_but_different',
@@ -42,6 +43,15 @@ function removed($context, $node) {
 
 function changed($before, $after) {
   return change($before, {
+    type: 'changed',
+    oldNode: $before,
+    newNode: $after,
+    message: "Modified: " + coloredChanges(stringify($before), stringify($after))
+  });
+}
+
+function changedText($before, $after) {
+  return change($before.parent(), {
     type: 'changed',
     oldNode: $before,
     newNode: $after,

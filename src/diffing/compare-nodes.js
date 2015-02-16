@@ -104,7 +104,7 @@ function compareNodes($n1, $n2, options) {
     });
 
     // we compare the children too, and return all the changes aggregated
-    possibleChanges += $n1.contents().length + $n2.contents().length;
+    possibleChanges += _.max([$n1.contents().length, $n2.contents().length]);
     var childChanges = compareChildren($n1, $n2, options);
     changes = changes.concat(childChanges);
 
@@ -117,8 +117,8 @@ function compareNodes($n1, $n2, options) {
       return false;
 
     // determine similarity to find out if this is the same node, or completely different
-    var similarity = 1.0 - (changes.length / possibleChanges);
-    var level = (similarity < 0.5) ? DiffLevel.NOT_THE_SAME_NODE : DiffLevel.SAME_BUT_DIFFERENT;
+    var similarity = 1.0 - (foundChanges / possibleChanges);
+    var level = (similarity < 0.51) ? DiffLevel.NOT_THE_SAME_NODE : DiffLevel.SAME_BUT_DIFFERENT;
     return {
       level: level,
       changes: changes
@@ -178,7 +178,7 @@ function compareNodes($n1, $n2, options) {
     if (t1 != t2) {
       return {
         level: DiffLevel.SAME_BUT_DIFFERENT,
-        changes: [changeTypes.changed($n1, $n2)]
+        changes: [changeTypes.changedText($n1, $n2)]
       };
     } else {
       return false;
