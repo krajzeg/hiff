@@ -108,9 +108,18 @@ function compareNodes($n1, $n2, options) {
     var childChanges = compareChildren($n1, $n2, options);
     changes = changes.concat(childChanges);
 
-    foundChanges += _.filter(childChanges, function(change) {
-      return (change.in == $n1 || change.in == $n2);
-    }).length;
+    _.each(childChanges, function(change) {
+      if (change.in == $n1 || change.in == $n2) {
+        switch(change.type) {
+          case 'added':
+          case 'removed':
+            foundChanges += 0.5;
+            break;
+          default:
+            foundChanges += 1;
+        }
+      }
+    });
 
     // no changes?
     if (!changes.length)
