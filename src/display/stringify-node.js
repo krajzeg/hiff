@@ -1,5 +1,7 @@
 module.exports = stringifyNode;
 
+var nodeType = require('../util/cheerio-utils').nodeType;
+
 /**
  * Takes a cheerio node and returns a concise string representation of it,
  * regardless of type. Also handles corner-cases like printing 'undefined'
@@ -14,20 +16,22 @@ function stringifyNode($node) {
     return "[nothing]";
 
   var n = $node[0];
-  switch(n.type) {
+  switch(nodeType($node)) {
     case 'text':
       var text = $node.text();
       if (text.length > 40)
         text = text.substring(0, 37) + "...";
       return '"' + text + '"';
 
-    case 'directive':
-      return n.data;
-
     default:
       var $ = $node.cheerio;
       $clone = $node.clone();
-      $clone.html("...");
+
+      // shorten HTML if necessary
+      var originalHTML = $clone.html();
+      if (originalHTML && originalHTML.length > 80)
+        $clone.html("...");
+
       return $.html($clone);
   }
 }
