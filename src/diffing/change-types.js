@@ -60,7 +60,7 @@ function changedText($before, $after) {
 }
 
 function coloredChanges(beforeStr, afterStr) {
-  var parts = diff.diffChars(beforeStr, afterStr);
+  var parts = diff.diffWords(beforeStr, afterStr);
   return _.map(parts, function(part) {
     var color = part.added ? 'green' : (part.removed ? 'red' : 'grey');
     return colors[color](part.value);
