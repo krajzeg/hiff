@@ -16,14 +16,12 @@
   "license": "zlib",
   "devDependencies": {
     "chai": "^1.10.0",
-    "hiff": "git://github.com/krajzeg/hiff",
     "jshint": "^2.6.0",
     "mocha": "^2.1.0"
   },
   "dependencies": {
-    "cheerio": "^0.18.0",
-    "colors": "^1.0.3",
-    "diff": "^1.2.2",
-    "underscore": "^1.7.0"
+    "cheerio": "0.18.0",
+    "colors": "1.0.3",
+    "underscore": "1.7.0"
   }
 }
