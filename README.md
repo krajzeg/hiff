@@ -2,6 +2,8 @@
 
 Hiff is a small module that can take two pieces of HTML, compares them against each other, and return a complete list of differences between the two - ignoring things like attribute order or insignificant whitespace that don't influence semantics.
 
+Uses [cheerio](https://github.com/cheeriojs/cheerio) under the hood for HTML parsing.
+
 ## Quick start
 
 ```javascript
