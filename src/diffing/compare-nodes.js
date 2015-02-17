@@ -12,7 +12,6 @@ var DiffLevel = require('./change-types').DiffLevel;
 
 // ========================================================================================
 
-
 function compareNodes($n1, $n2, options) {
 
   var key = $n1[0].__uid + ':' + $n2[0].__uid;
@@ -55,9 +54,9 @@ function compareNodes($n1, $n2, options) {
     switch (type1) {
       case 'text': return compareTextNodes($n1, $n2);
       case 'element': return compareTags($n1, $n2);
-      case 'directive': return compareData($n1, $n2);
+      case 'directive':
       case 'comment':
-        return false; // ignore comments for now
+        return compareOuterHTML($n1, $n2);
       default:
         throw new Error("Unrecognized node type: " + type1);
     }
@@ -182,8 +181,10 @@ function compareNodes($n1, $n2, options) {
     }
   }
 
-  function compareData($n1, $n2) {
-    if ($n1[0].data != $n2[0].data) {
+  function compareOuterHTML($n1, $n2) {
+    var html1 = $n1.cheerio.html($n1);
+    var html2 = $n2.cheerio.html($n2);
+    if (html1 != html2) {
       return {
         level: DiffLevel.SAME_BUT_DIFFERENT,
         changes: [changeTypes.changedText($n1, $n2)]

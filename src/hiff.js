@@ -14,9 +14,14 @@ module.exports = {
   changed: changeTypes.changed
 };
 
+
+var DEFAULT_OPTIONS = {
+  ignoreComments: true
+};
+
 function diff(expected, actual, options) {
   // sanitize the options object so we don't have to validate everything down the road
-  options = options || {};
+  options = _.defaults(options || {}, DEFAULT_OPTIONS);
   if (typeof options.ignore == 'string')
     options.ignore = [options.ignore];
 
@@ -30,8 +35,8 @@ function diff(expected, actual, options) {
   var $n2 = node($2, $2.root());
 
   // prepare (remove some things that produces false positives)
-  prepareForDiff($n1);
-  prepareForDiff($n2);
+  prepareForDiff($n1, options);
+  prepareForDiff($n2, options);
 
   // compare the roots recursively
   return compareNodes($n1, $n2, options);

@@ -1,3 +1,4 @@
+// list copied from MDN
 var NodeType = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
@@ -29,14 +30,17 @@ module.exports = {
   },
 
   nodeType: function ($node) {
-    // special handling for 'directives' - <!DOCTYPE, <!CDATA, etc.
-    if ($node[0].data !== undefined && $node[0].nodeType != NodeType.TEXT_NODE) {
+    var domType = $node[0].nodeType;
+    if ($node[0].data !== undefined) {
+      // hack for faulty reporting on cheerio side (some things starting with <! are reported as comments)
       var data = $node[0].data;
-      console.log(data);
-      return 'directive';
+      if (/^\[CDATA/.test(data))
+        return 'directive';
+      if (domType != NodeType.TEXT_NODE && domType != NodeType.COMMENT_NODE)
+        return 'directive';
     }
 
-    switch($node[0].nodeType) {
+    switch(domType) {
       case NodeType.TEXT_NODE: return 'text';
       case NodeType.ELEMENT_NODE: return 'element';
       case NodeType.COMMENT_NODE: return 'comment';
