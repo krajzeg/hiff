@@ -13,6 +13,7 @@
     "semantic",
     "cheerio"
   ],
+  "repository": "krajzeg/hiff",
   "author": "Jakub Wasilewski <wasyl@wasyl.eu>",
   "license": "zlib",
   "devDependencies": {
