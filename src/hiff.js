@@ -39,5 +39,11 @@ function diff(expected, actual, options) {
   prepareForDiff($n2, options);
 
   // compare the roots recursively
-  return compareNodes($n1, $n2, options);
+  var diffObject = compareNodes($n1, $n2, options);
+
+  // strip some of the low-level information that compareNodes uses internally
+  if (diffObject)
+    return diffObject.changes;
+  else
+    return false;
 }

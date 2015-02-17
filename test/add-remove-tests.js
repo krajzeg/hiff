@@ -4,14 +4,14 @@ var hiff = require('../src/hiff');
 
 function assertOneAddition(diff) {
   assert(diff);
-  assert.equal(diff.changes.length, 1);
-  assert.equal(diff.changes[0].type, 'added');
+  assert.equal(diff.length, 1);
+  assert.equal(diff[0].type, 'added');
 }
 
 function assertOneRemoval(diff) {
   assert(diff);
-  assert.equal(diff.changes.length, 1);
-  assert.equal(diff.changes[0].type, 'removed');
+  assert.equal(diff.length, 1);
+  assert.equal(diff[0].type, 'removed');
 }
 
 describe("Adding tags", function () {
@@ -67,9 +67,9 @@ describe("Multiple additions/removals", function() {
     var html1 = "<div id='multi'> <b>1</b> <br> <i>2</i> <p>3</p> <b>4</b> <a>5</a> </div>";
     var html2 = "<div id='multi'> <a>added</a> <b>1</b> <i>2</i> <strong>Hello</strong> <em>Hi!</em> <p>3</p> <b>4</b> <a>5</a> <em>Done.</em></div>";
     var diff = hiff.diff(html1, html2);
-    var changeTypes = _.pluck(diff.changes, 'type');
+    var changeTypes = _.pluck(diff, 'type');
     assert.deepEqual(changeTypes, ['added', 'removed', 'added', 'added', 'added']);
-    var tags = _.chain(diff.changes).pluck('node').pluck(0).pluck('name').value();
+    var tags = _.chain(diff).pluck('node').pluck(0).pluck('name').value();
     assert.deepEqual(tags, ['a', 'br', 'strong', 'em', 'em']);
   });
 });

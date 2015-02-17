@@ -1,5 +1,6 @@
-var hiff = require('../src/hiff');
 var assert = require('chai').assert;
+var _ = require('underscore');
+var hiff = require('../src/hiff');
 
 describe("Similarity testing", function () {
   it("should report node as the same when similarity >=50%", function () {
@@ -7,7 +8,7 @@ describe("Similarity testing", function () {
     var html2 = "<div><b>same</b><b>same</b><i>yep</i><i>yep</i></div>";
     var d = hiff.diff(html1, html2);
     assert(d);
-    assert.equal(d.level, 'same_but_different');
+    assert.deepEqual(_.pluck(d, 'type'), ['added', 'added', 'removed', 'removed']);
   });
 
   it("should report node as completely different when similarity <50%", function () {
@@ -15,6 +16,6 @@ describe("Similarity testing", function () {
     var html2 = "<div><b>same</b><i>yep</i><i>yep</i><i>yep</i></div>";
     var d = hiff.diff(html1, html2);
     assert(d);
-    assert.equal(d.level, 'not_the_same_node');
+    assert.deepEqual(_.pluck(d, 'type'), ['added', 'removed']);
   });
 });

@@ -22,7 +22,6 @@ describe("Directive nodes", function () {
     var html2 = "<div></div>";
     var difference = diff(html1, html2);
     assert.ok(difference);
-    assert.equal(difference.level, 'not_the_same_node');
   });
 });
 
@@ -46,6 +45,5 @@ describe("CDATA nodes", function () {
     var html2 = "<div></div>";
     var difference = diff(html1, html2);
     assert.ok(difference);
-    assert.equal(difference.level, 'not_the_same_node');
   });
 });
