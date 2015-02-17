@@ -29,19 +29,19 @@ module.exports = {
   },
 
   nodeType: function ($node) {
+    // special handling for 'directives' - <!DOCTYPE, <!CDATA, etc.
+    if ($node[0].data !== undefined && $node[0].nodeType != NodeType.TEXT_NODE) {
+      var data = $node[0].data;
+      console.log(data);
+      return 'directive';
+    }
+
     switch($node[0].nodeType) {
       case NodeType.TEXT_NODE: return 'text';
+      case NodeType.ELEMENT_NODE: return 'element';
       case NodeType.COMMENT_NODE: return 'comment';
-      case NodeType.ELEMENT_NODE:
-        if ($node[0].data) {
-          return 'directive';
-        } else {
-          return 'element';
-        }
-        break;
-
       default:
-        throw new Error("Unhandled node type: ", $node[0].nodeType);
+        throw new Error("Unhandled node type: " + $node[0].nodeType);
     }
   },
 
