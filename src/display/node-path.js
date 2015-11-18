@@ -22,25 +22,32 @@ function nodeSpecifier($node) {
     return '';
 
   if (!$node[0].name)
-    return "[" + $node[0].type + "]";
+    return "<<" + $node[0].type + ">>";
 
   // the description of a node always includes the tag name
   var tagName = $node[0].name;
   if (tagName == 'root')
     return '';
 
-  // if it has an id, that's preferred
+  var specifier = tagName;
   if ($node.attr('id')) {
-    return util.format('%s#%s', tagName, $node.attr('id'));
-  }
-
-  // if it has classes, those are good too
-  if ($node.attr('class')) {
+    // if we have an id, that's preferred
+    specifier += '#' + $node.attr('id');
+  } else if ($node.attr('class')) {
+    // if we have no id, then let's add a class
     var classes = $node.attr('class').replace(/^\s+|\s+$/, '').split(/\s+/);
-    return util.format('%s.%s', tagName, classes.join('.'));
+    specifier += '.' + classes.join('.');
   }
 
-  // no distinguishing characteristics, use the index in parent
-  var index = $node.prevAll().length;
-  return util.format("%s[%d]", tagName, index);
+  // we've now specified as much as we can - if this is not unique yet,
+  // we'll have to grudgingly add an :nth-child(n) pseudo-class to disambiguate
+  var matchesAnythingElse = ($node.prevAll(specifier).length + $node.nextAll(specifier).length) > 0; // .siblings() doesn't seem to work as expected
+  if (matchesAnythingElse) {
+    // not unique enough!
+    var index = $node.prevAll(specifier).length + 1; // CSS indices are one-based
+    return specifier + util.format(":nth-of-type(%d)", index);
+  } else {
+    // unique enough!
+    return specifier;
+  }
 }
