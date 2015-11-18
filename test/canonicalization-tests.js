@@ -1,9 +1,9 @@
-var diff = require('../src/hiff').diff;
+var compare = require('../src/hiff').compare;
 var assert = require('chai').assert;
 
 function noChange(html1, html2) {
   return function() {
-    assert.isFalse(diff(html1, html2));
+    assert.isFalse(compare(html1, html2).different);
   };
 }
 
