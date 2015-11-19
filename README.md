@@ -1,6 +1,6 @@
 # Hiff - the diff that understands HTML
 
-Hiff is a small module that can take two pieces of HTML, compares them against each other, and return a complete list of differences between the two - ignoring things like attribute order or insignificant whitespace that don't influence semantics.
+Hiff is a small module that can take two pieces of HTML, compare them against each other, and return a complete list of differences between the two - ignoring things like attribute order or insignificant whitespace that don't influence semantics. Basically, if it would render the same in a browser, it'll compare as equal.
 
 Uses [cheerio][cheerio] under the hood for HTML parsing.
 
@@ -50,6 +50,7 @@ The `options` argument is not required, but it allows you to influence how the c
 
 * **ignoreComments** (default: true) - if true, comments will be stripped from both pieces of HTML before looking for changes, effectively ignoring them completely.
 * **ignore** (default: []) - a list of JQuery selectors for nodes that you want to ignore when comparing, e.g. `['.ad', 'div[ignore="true"]']`. All changes to the attributes or contents of nodes matching the selectors will be ignored.
+* **ignoreText** (default: []) - a list of selectors for nodes whose text content you want to ignore. This will only ignore changes to existing text - structural changes like adding a new text node where there wasn't any will still be reported. You can also set this option to `true` to ignore content of *all* text nodes.
 
 ### Change objects
 
