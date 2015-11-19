@@ -19,7 +19,8 @@
   "devDependencies": {
     "chai": "^1.10.0",
     "jshint": "^2.6.0",
-    "mocha": "^2.1.0"
+    "mocha": "^2.1.0",
+    "q-io": "^1.13.1"
   },
   "dependencies": {
     "cheerio": "0.18.0",
