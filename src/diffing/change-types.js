@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var colors = require('colors');
-var diff = require('./impl/diff');
+var diff = require('diff');
 var stringify = require('../display/stringify-node');
 var cssPath = require('../util/css-path');
 

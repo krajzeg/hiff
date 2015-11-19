@@ -25,6 +25,7 @@
   "dependencies": {
     "cheerio": "0.18.0",
     "colors": "1.0.3",
+    "diff": "2.2.1",
     "underscore": "1.7.0"
   }
 }

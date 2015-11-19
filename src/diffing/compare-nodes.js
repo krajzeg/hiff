@@ -13,7 +13,9 @@ var DiffLevel = require('./change-types').DiffLevel;
 // ========================================================================================
 
 function compareNodes($n1, $n2, options) {
-
+  if (($n1[0] === undefined) || ($n2[0] === undefined)) {
+    console.log("Oh.");
+  }
   var key = $n1[0].__uid + ':' + $n2[0].__uid;
 
   // do we have a memoized result?
