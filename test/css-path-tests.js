@@ -1,6 +1,6 @@
 var compare = require('../src/hiff').compare;
 var cheerio = require('cheerio');
-var nodePath = require('../src/display/node-path');
+var nodePath = require('../src/util/css-path');
 var assert = require('chai').assert;
 var fs = require('q-io/fs');
 var path = require('path');

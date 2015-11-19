@@ -1,16 +1,16 @@
 var util = require('util');
 
-module.exports = nodePath;
+module.exports = cssPath;
 
 // =======================================================
 
-function nodePath($node) {
+function cssPath($node) {
   var parent = $node.parent();
 
   if (!parent.length)
     return nodeSpecifier($node);
 
-  var parentPath = nodePath($node.parent());
+  var parentPath = cssPath($node.parent());
   if (parentPath)
     return parentPath + ' > ' + nodeSpecifier($node);
   else

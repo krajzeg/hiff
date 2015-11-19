@@ -2,7 +2,7 @@ var _ = require('underscore');
 var colors = require('colors');
 var diff = require('./impl/diff');
 var stringify = require('../display/stringify-node');
-var nodePath = require('../display/node-path');
+var cssPath = require('../util/css-path');
 
 module.exports = {
   added: added,
@@ -21,7 +21,7 @@ module.exports = {
 function change($contextNode, changeObject) {
   return _.extend(changeObject, {
     in: $contextNode,
-    path: nodePath($contextNode)
+    path: cssPath($contextNode)
   });
 }
 
