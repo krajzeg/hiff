@@ -28,7 +28,7 @@ function compareNodes($n1, $n2, options) {
   }
 
   // compare and memoize result
-  var result = findDifferences($n1, $n2);
+  var result = findDifferences($n1, $n2, options);
   if (options.memo) {
     options.memo[key] = result;
   }
@@ -38,7 +38,7 @@ function compareNodes($n1, $n2, options) {
 
   // ==========================================================================================
 
-  function findDifferences($n1, $n2) {
+  function findDifferences($n1, $n2, options) {
     // determine node types
     var type1 = nodeType($n1), type2 = nodeType($n2);
 
@@ -52,7 +52,7 @@ function compareNodes($n1, $n2, options) {
 
     // compare the nodes using logic specific to their type
     switch (type1) {
-      case 'text': return compareTextNodes($n1, $n2);
+      case 'text': return compareTextNodes($n1, $n2, options.ignoreText);
       case 'element': return compareTags($n1, $n2);
       case 'directive':
       case 'comment':
@@ -168,9 +168,15 @@ function compareNodes($n1, $n2, options) {
     return changes;
   }
 
-  function compareTextNodes($n1, $n2) {
+  function compareTextNodes($n1, $n2, ignoredParents) {
+    // check for 'ignoreText' settings first
+    if (textNodesShouldBeIgnored($n1, $n2, ignoredParents))
+      return false;
+
+    // canonicalize whitespace etc. to get reliable results
     var t1 = canonicalizeText($n1.text());
     var t2 = canonicalizeText($n2.text());
+
     if (t1 != t2) {
       return {
         level: DiffLevel.SAME_BUT_DIFFERENT,
@@ -179,6 +185,18 @@ function compareNodes($n1, $n2, options) {
     } else {
       return false;
     }
+  }
+
+  function textNodesShouldBeIgnored($n1, $n2, ignoredParents) {
+    var $parent1 = $n1.parent(), $parent2 = $n2.parent();
+    if (!$parent1 || !$parent2)
+      return false;
+
+    // we ignore the contents of the nodes if both parents match
+    // any of the ignored selectors
+    return _.any(ignoredParents, function(selector) {
+      return $parent1.is(selector) && $parent2.is(selector);
+    });
   }
 
   function compareOuterHTML($n1, $n2) {

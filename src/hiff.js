@@ -19,7 +19,16 @@ module.exports = {
 
 
 var DEFAULT_OPTIONS = {
-  ignoreComments: true
+  // a list of selectors to ignore - nodes that match won't influence the comparison
+  ignore: [],
+
+  // if set to true, comments will be stripped from the content before comparison,
+  // so differences in comments won't count
+  ignoreComments: true,
+
+  // if provided, this is a list of selectors for which text nodes will be ignored
+  // in the comparison. Setting to true is the same ['*'], meaning text is always ignored.
+  ignoreText: []
 };
 
 /// Compares two HTML strings, return a diff object describing the changes, if any.
@@ -69,13 +78,25 @@ function prepareOptions(options) {
   // use defaults
   options = _.defaults(options || {}, DEFAULT_OPTIONS);
 
-  // sanitize some types
-  if (typeof options.ignore == 'string')
-    options.ignore = [options.ignore];
+  // disenchant magic values
+  if (options.ignoreText === true) {
+    options.ignoreText = ['*'];
+  }
+
+  // sanitize lists
+  ['ignore', 'ignoreText'].map(function(name) {
+    options[name] = ensureArray(options[name]);
+  });
 
   // make a place to store memoized comparison results
   options.memo = {};
 
   // return the new object
   return options;
+}
+
+// Ensures that the value of an option is an array, turning other values into single-element
+// arrays when necessary.
+function ensureArray(option) {
+  return (option.length === undefined) ? [option] : option;
 }
