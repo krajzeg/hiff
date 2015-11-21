@@ -56,20 +56,17 @@ The `options` argument is not required, but it allows you to influence how the c
 
 Change objects provide the following properties:
 
-* **type** - `added`, `removed` or `changed` - depending on what type of change was detected.
-* **in** - the Cheerio node in which the change was detected
-* **path** - a CSS-like path for the node in which the change was detected, e.g. 'div#navigation > a.nav'
+* **type** - `'added'`, `'removed'` or `'changed'` - depending on what type of change was detected.
 * **message** - a printable message describing the change (colorized for use on XTerm-compatible terminals, with green for additions and red for removals)
+* **before**, **after** - objects describing the location of the change in the old DOM and in the new DOM, respectively
 
-For `added` and `removed` only:
+The **before** and **after** objects share the same format and let you pinpoint the change if you want to, for example, modify the new DOM in response to changes. All properties starting with `$` are [cheerio][cheerio] selections, so you can call cheerio methods on them directly. The properties of **before** and **after** are as follows:
 
-* **node** - the Cheerio node that was added/removed
-
-For `changed` only:
-
-* **oldNode** - the Cheerio node as it looked in the old HTML
-* **newNode** - the Cheerio node as it looked in the new HTML
-
-
+* **$node** - a reference to the node itself. If the node was added or removed, it will only be available only in **before.$node** (if it was removed) or only in in **after.$node** (if it was added)
+* **$previous**, **$next** - especially useful for additions and removals, this pinpoint the location of the change by giving you references to surrounding nodes.
+* **$parent** - this is a reference to the parent of the node that was added/changed/removed.
+* **path** - a CSS selector for the node that was changed/added/removed. If the changed node was a text node, a comment or a directive (like <!DOCTYPE>), this property will be `undefined`. These types of nodes cannot be selected with CSS selectors, unfortunately. If it is provided, `$(change.before.path)` should always be the same as `change.before.$node` (and likewise for **after**).
+* **parentPath** - a CSS selector for the parent of the changed/added/removed node. Unlike **path**, this property is always available - the parent is always an element node.
+* **index** - the child index of the changed node. This index is calculated including text nodes, comment nodes, etc. This means that `change.before.$parent.contents()[change.before.index]` will give you the correct, but using `.children()` won't, as that property only includes element nodes. This property will be provided even if the node doesn't exist in the specific DOM (added nodes don't exist **before**, and removed nodes **after**) - in that case it will point to the index at which the node would be if it _was_ in the DOM in question.
 
 [cheerio]: https://github.com/cheeriojs/cheerio
