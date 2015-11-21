@@ -150,14 +150,14 @@ function compareNodes($n1, $n2, options) {
         });
       } else if (part.added) {
         var addedNodes = list2.slice(index2, index2 + part.count);
-        changes = changes.concat(addedNodes.map(function($node) {
-          return changeTypes.added($node, $parent1, index1, $parent2, index2);
+        changes = changes.concat(addedNodes.map(function($node, offset) {
+          return changeTypes.added($node, $parent1, index1, $parent2, index2 + offset);
         }));
         index2 += part.count;
       } else if (part.removed) {
         var removedNodes = list1.slice(index1, index1 + part.count);
-        changes = changes.concat(removedNodes.map(function($node) {
-          return changeTypes.removed($node, $parent1, index1, $parent2, index2);
+        changes = changes.concat(removedNodes.map(function($node, offset) {
+          return changeTypes.removed($node, $parent1, index1 + offset, $parent2, index2);
         }));
         index1 += part.count;
       }

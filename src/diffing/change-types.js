@@ -73,14 +73,6 @@ function changed($nodeBefore, $nodeAfter) {
 
 // === common functionality for nailing down change locations
 
-function grabParentAndIndex($node) {
-  var $ = $node.cheerio, $parent = node($, safeParent($node));
-  var index = _.findIndex($parent.contents(), function(n) {
-    return $(n).is($node);
-  });
-  return {$parent: $parent, index: index};
-}
-
 function locationInfo($parentNode, $node, index) {
   var siblingsInfo = findSiblings($parentNode, $node, index);
 
@@ -111,6 +103,14 @@ function findSiblings($parentNode, $node, index) {
     $previous: prevExists ? $($parentNode.contents()[prevIndex]) : undefined,
     $next: nextExists ? $($parentNode.contents()[nextIndex]) : undefined
   };
+}
+
+function grabParentAndIndex($node) {
+  var $ = $node.cheerio, $parent = node($, safeParent($node));
+  var index = _.findIndex($parent.contents(), function(n) {
+    return $(n).is($node);
+  });
+  return {$parent: $parent, index: index};
 }
 
 // === colored messages
