@@ -13,7 +13,7 @@ var result = hiff.compare('<div>Some HTML</div>', '<div>Possibly changed HTML</d
 if (result.different) {
   console.log("HTML fragments are different, changes:");
   result.changes.map(function(change) {
-    console.log("In " + change.path + ":\n\t" + change.message);
+    console.log("In node " + change.before.parentPath + ":\n\t" + change.message);
   });
 } else {
   console.log("No changes found.");
