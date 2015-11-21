@@ -1,4 +1,5 @@
 var util = require('util');
+var nodeType = require('../util/cheerio-utils').nodeType;
 
 module.exports = cssPath;
 
@@ -6,7 +7,7 @@ module.exports = cssPath;
 
 function cssPath($node) {
   // empty selections and selections for non-tag nodes don't have valid css paths
-  if (!$node.length || !$node[0].name)
+  if (!$node.length || nodeType($node) != 'element')
     return undefined;
 
   // recursion

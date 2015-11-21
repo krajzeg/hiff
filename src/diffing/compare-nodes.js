@@ -13,9 +13,6 @@ var DiffLevel = require('./change-types').DiffLevel;
 // ========================================================================================
 
 function compareNodes($n1, $n2, options) {
-  if (($n1[0] === undefined) || ($n2[0] === undefined)) {
-    console.log("Oh.");
-  }
   var key = $n1[0].__uid + ':' + $n2[0].__uid;
 
   // do we have a memoized result?
@@ -130,11 +127,11 @@ function compareNodes($n1, $n2, options) {
     var list2 = _.map($n2.contents(), function(n) {
       return node($n2.cheerio, n);
     });
-    return compareNodeLists($n1, list1, list2, options);
+    return compareNodeLists($n1, $n2, list1, list2, options);
   }
 
 
-  function compareNodeLists($parent, list1, list2, options) {
+  function compareNodeLists($parent1, $parent2, list1, list2, options) {
     var nodeDiff = require('./node-list-diff');
     var parts = nodeDiff.diffLists(list1, list2, options);
 
@@ -146,23 +143,23 @@ function compareNodes($n1, $n2, options) {
         var nodesToCheck = _.zip(list1.slice(index1, index1 + part.count), list2.slice(index2, index2 + part.count));
         index1 += part.count; index2 += part.count;
         _.each(nodesToCheck, function(pair) {
-          var nodeCompare = compareNodes(pair[0], pair[1], options);
-          if (nodeCompare) {
-            changes = changes.concat(nodeCompare.changes);
+          var nested = compareNodes(pair[0], pair[1], options);
+          if (nested) {
+            changes = changes.concat(nested.changes);
           }
         });
       } else if (part.added) {
         var addedNodes = list2.slice(index2, index2 + part.count);
-        index2 += part.count;
-        changes = changes.concat(addedNodes.map(function(node) {
-          return changeTypes.added($parent, node);
+        changes = changes.concat(addedNodes.map(function($node) {
+          return changeTypes.added($node, $parent1, index1, $parent2, index2);
         }));
+        index2 += part.count;
       } else if (part.removed) {
         var removedNodes = list1.slice(index1, index1 + part.count);
-        index1 += part.count;
-        changes = changes.concat(removedNodes.map(function(node) {
-          return changeTypes.removed($parent, node);
+        changes = changes.concat(removedNodes.map(function($node) {
+          return changeTypes.removed($node, $parent1, index1, $parent2, index2);
         }));
+        index1 += part.count;
       }
     });
 
