@@ -256,4 +256,31 @@ describe("Change objects", function() {
     });
   });
 
+  it("should give 'undefined' in $previous for changes to first node", function() {
+    var html1 = "<div><a>A</a><b>B</b></div>";
+    var html2 = "<div><b>B</b></div>";
+    var d = hiff.compare(html1, html2);
+    assert.equal(d.changes[0].before.$previous, undefined);
+    assert.equal(d.changes[0].after.$previous, undefined);
+  });
+
+  it("should give 'undefined' in $next for changes to last node", function() {
+    var html1 = "<div><a>A</a><b>B</b></div>";
+    var html2 = "<div><a>A</a></div>";
+    var d = hiff.compare(html1, html2);
+    assert.equal(d.changes[0].before.$next, undefined);
+    assert.equal(d.changes[0].after.$next, undefined);
+  });
+
+  it("should give the root in $parent and parentPath for top-level elements", function() {
+    var html1 = "<div>Hi!</div>";
+    var html2 = "<div class='greeting'>Hi!</div>";
+    var d = hiff.compare(html1, html2);
+    var $1 = d.$before, $2 = d.$after, ch = d.changes[0];
+
+    assert(ch.before.$parent.is($1.root()));
+    assert(ch.after.$parent.is($2.root()));
+    assert.equal(ch.before.parentPath, ":root");
+    assert.equal(ch.after.parentPath, ":root");
+  });
 });

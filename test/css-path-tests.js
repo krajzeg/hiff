@@ -51,6 +51,12 @@ describe("nodePath()", function() {
     });
   });
 
+  it("should return ':root' for the artificial root element", function() {
+    var html = "<div></div>";
+    var $ = cheerio.load(html);
+    assert.equal(cssPath($.root()), ":root");
+  });
+
   it("should produce paths that can be fed back to $()", function(done) {
     fs.read(path.join(__dirname, "inputs/path-roundtrip-test.html")).then(function(html) {
       var $ = cheerio.load(html);

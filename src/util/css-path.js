@@ -10,6 +10,9 @@ function cssPath($node) {
   if (!$node.length || nodeType($node) != 'element')
     return undefined;
 
+  // very special cases
+  if ($node[0].type == 'root') return ':root';
+
   // recursion
   var parent = $node.parent();
   if (parent.length) {
