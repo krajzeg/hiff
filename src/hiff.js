@@ -37,8 +37,8 @@ function compare(before, after, options) {
   options = prepareOptions(options);
 
   // parse both pieces of HTML with cheerio and get the root nodes
-  $1 = cheerio.load(before);
-  $2 = cheerio.load(after);
+  var $1 = cheerio.load(before);
+  var $2 = cheerio.load(after);
   var $n1 = node($1, $1.root());
   var $n2 = node($2, $2.root());
 
