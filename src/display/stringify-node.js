@@ -7,7 +7,6 @@ var nodeType = require('../util/cheerio-utils').nodeType;
  * regardless of type. Also handles corner-cases like printing 'undefined'
  * or 'null' as '[nothing]'.
  *
- * @param $ the cheerio instance the node belongs to
  * @param $node the cheerio object for the node
  * @returns {string} a printable string
  */
@@ -15,7 +14,6 @@ function stringifyNode($node) {
   if (!$node)
     return "[nothing]";
 
-  var n = $node[0];
   switch(nodeType($node)) {
     case 'text':
       var text = $node.text();
@@ -25,7 +23,7 @@ function stringifyNode($node) {
 
     default:
       var $ = $node.cheerio;
-      $clone = $node.clone();
+      var $clone = $node.clone();
 
       // shorten HTML if necessary
       var originalHTML = $clone.html();
