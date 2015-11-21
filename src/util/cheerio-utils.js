@@ -49,6 +49,14 @@ module.exports = {
     }
   },
 
+  // differs from $node.parent() in what it does at the top-level
+  // the built-in .parent() returns an empty selection if the parent would be root
+  // we actually want the root in that case
+  safeParent: function($node) {
+    var parent = $node.parent();
+    return parent.length ? parent : $node.cheerio.root();
+  },
+
   canonicalizeText: function canonicalizeText(text) {
     text = module.exports.canonicalizeAttribute(text); // same as for attributes
     text = text.replace(/^\s+|\s+$/g, ''); // plus a trim

@@ -1,28 +1,34 @@
 var util = require('util');
+var nodeType = require('../util/cheerio-utils').nodeType;
 
 module.exports = cssPath;
 
 // =======================================================
 
 function cssPath($node) {
+  // empty selections and selections for non-tag nodes don't have valid css paths
+  if (!$node.length || nodeType($node) != 'element')
+    return undefined;
+
+  // very special cases
+  if ($node[0].type == 'root') return ':root';
+
+  // recursion
   var parent = $node.parent();
-
-  if (!parent.length)
-    return nodeSpecifier($node);
-
-  var parentPath = cssPath($node.parent());
-  if (parentPath)
-    return parentPath + ' > ' + nodeSpecifier($node);
-  else
-    return nodeSpecifier($node);
+  if (parent.length) {
+    var parentPath = cssPath($node.parent());
+    if (parentPath)
+      return parentPath + ' > ' + nodeSelector($node);
+    else
+      return nodeSelector($node);
+  } else {
+    return nodeSelector($node);
+  }
 }
 
-function nodeSpecifier($node) {
+function nodeSelector($node) {
   if (!$node.length)
     return '';
-
-  if (!$node[0].name)
-    return "<<" + $node[0].type + ">>";
 
   // the description of a node always includes the tag name
   var tagName = $node[0].name;

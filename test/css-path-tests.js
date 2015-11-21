@@ -1,9 +1,10 @@
 var compare = require('../src/hiff').compare;
 var cheerio = require('cheerio');
-var nodePath = require('../src/util/css-path');
+var cssPath = require('../src/util/css-path');
 var assert = require('chai').assert;
 var fs = require('q-io/fs');
 var path = require('path');
+var _ = require('underscore');
 
 describe("nodePath()", function() {
   it("should prefer to identify elements by ID", function() {
@@ -30,14 +31,30 @@ describe("nodePath()", function() {
     var html = "<a>One.</a><a>Two.</a><a>Three.</a>";
     var $ = cheerio.load(html);
     var $secondA = $($('a')[1]);
-    assert.equal(nodePath($secondA), "a:nth-of-type(2)");
+    assert.equal(cssPath($secondA), "a:nth-of-type(2)");
   });
 
   it("should use nth-of-type() to disambiguate even if classes are present", function() {
     var html = '<a class="red">One.</a><a class="red">Two.</a><a class="red">Three.</a>';
     var $ = cheerio.load(html);
     var $secondA = $($('a')[1]);
-    assert.equal(nodePath($secondA), "a.red:nth-of-type(2)");
+    assert.equal(cssPath($secondA), "a.red:nth-of-type(2)");
+  });
+
+  it("should return 'undefined' for nodes which don't have valid CSS paths", function() {
+    var html = "<div><!-- No path -->Nowhere.<![CDATA[no how]]></div>";
+    var $ = cheerio.load(html);
+    var contents = _.map($('div').contents(), function(node) { return $(node); });
+
+    _.each(contents, function($node) {
+      assert.strictEqual(cssPath($node), undefined);
+    });
+  });
+
+  it("should return ':root' for the artificial root element", function() {
+    var html = "<div></div>";
+    var $ = cheerio.load(html);
+    assert.equal(cssPath($.root()), ":root");
   });
 
   it("should produce paths that can be fed back to $()", function(done) {
@@ -46,7 +63,7 @@ describe("nodePath()", function() {
 
       // check if CSS paths roundtrip correctly for all nodes
       $('*').each(function() {
-        var $node = $(this), path = nodePath($node);
+        var $node = $(this), path = cssPath($node);
         if ($.html($node) != $.html($(path))) {
           throw new AssertionError("Path '" + path + "' is incorrect for node:\n" + $.html($node));
         }
@@ -57,5 +74,5 @@ describe("nodePath()", function() {
 
 function nodePathFor(html, selector) {
   var $ = cheerio.load(html);
-  return nodePath($(selector));
+  return cssPath($(selector));
 }
