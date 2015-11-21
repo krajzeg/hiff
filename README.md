@@ -59,6 +59,11 @@ Change objects provide the following properties:
 * **type** - `'added'`, `'removed'` or `'changed'` - depending on what type of change was detected.
 * **message** - a printable message describing the change (colorized for use on XTerm-compatible terminals, with green for additions and red for removals)
 * **before**, **after** - objects describing the location of the change in the old DOM and in the new DOM, respectively
+* **in** - the Cheerio node in which the change was detected
+  - for `changed` diff it's the current changed node in the oldHTML context
+  - example: `<title>page1</title>` vs `<title>page2</title>` the **oldNode** and **newNode** will refer to the text nodes, but the `change` will refer to `<title>`
+  - for `added` or `removed` it's the parent of the added or removed node in the oldHTML context
+* **path** - a CSS-like path for the node in which the change was detected, e.g. 'div#navigation > a.nav'
 
 The **before** and **after** objects share the same format and let you pinpoint the change if you want to, for example, modify the new DOM in response to changes. All properties starting with `$` are [cheerio][cheerio] selections, so you can call cheerio methods on them directly. The properties of **before** and **after** are as follows:
 
