@@ -72,6 +72,7 @@ describe("Change objects", function() {
     var html1 = "<div class='test'><a>A</a><i>I</i><b>B</b></div>";
     var html2 = "<div class='test'><a>A</a><i class='new'>I</i><b>B</b></div>";
     var d = hiff.compare(html1, html2);
+    assert.ok(d.different);
 
     var change = d.changes[0];
     assert.equal(change.type, 'changed');
@@ -199,11 +200,12 @@ describe("Change objects", function() {
   describe("with multiple additions", function() {
     var html1 = "<div><a>A</a><b>B</b></div>";
     var html2 = "<div><a>A</a><i>One.</i><p>Two.</p><b>B</b></div>";
-    var d = hiff.compare(html1, html2);
-    var $1 = d.$before, $2 = d.$after;
-    var ch1 = d.changes[0], ch2 = d.changes[1];
 
     it("should provide correct indices", function() {
+      var d = hiff.compare(html1, html2);
+      var $1 = d.$before, $2 = d.$after;
+      var ch1 = d.changes[0], ch2 = d.changes[1];
+
       // in the old DOM, both insertions sit at index 1
       assert.equal(ch1.before.index, 1);
       assert.equal(ch2.before.index, 1);
@@ -213,6 +215,10 @@ describe("Change objects", function() {
     });
 
     it("should provide $previous and $next correctly", function() {
+      var d = hiff.compare(html1, html2);
+      var $1 = d.$before, $2 = d.$after;
+      var ch1 = d.changes[0], ch2 = d.changes[1];
+
       // in the old DOM, both sit between <a> and <b>
       assert(ch1.before.$previous.is($1('a')));
       assert(ch1.before.$next.is($1('b')));
@@ -229,11 +235,12 @@ describe("Change objects", function() {
   describe("with multiple removals", function() {
     var html1 = "<div><a>A</a><i>One.</i><p>Two.</p><b>B</b></div>";
     var html2 = "<div><a>A</a><b>B</b></div>";
-    var d = hiff.compare(html1, html2);
-    var $1 = d.$before, $2 = d.$after;
-    var ch1 = d.changes[0], ch2 = d.changes[1];
 
     it("should provide correct indices", function() {
+      var d = hiff.compare(html1, html2);
+      var $1 = d.$before, $2 = d.$after;
+      var ch1 = d.changes[0], ch2 = d.changes[1];
+
       // in the old DOM, the nodes have separate indices
       assert.equal(ch1.before.index, 1);
       assert.equal(ch2.before.index, 2);
@@ -243,6 +250,10 @@ describe("Change objects", function() {
     });
 
     it("should provide $previous and $next correctly", function() {
+      var d = hiff.compare(html1, html2);
+      var $1 = d.$before, $2 = d.$after;
+      var ch1 = d.changes[0], ch2 = d.changes[1];
+
       // in the old DOM, they see each other
       assert(ch1.before.$previous.is($1('a')));
       assert(ch1.before.$next.is($1('p')));

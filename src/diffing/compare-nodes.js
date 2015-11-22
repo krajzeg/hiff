@@ -5,6 +5,7 @@ var canonicalizeText = require('../util/cheerio-utils').canonicalizeText;
 var canonicalizeAttribute = require('../util/cheerio-utils').canonicalizeAttribute;
 var nodeType = require('../util/cheerio-utils').nodeType;
 var changeTypes = require('./change-types');
+var tagComparisonHeuristic = require('./tag-comparison-heuristic')();
 
 module.exports = compareNodes;
 
@@ -61,63 +62,45 @@ function compareNodes($n1, $n2, options) {
     }
   }
 
+  // Compares tags using a heuristic provided from outside.
   function compareTags($n1, $n2) {
-    var changes = [];
-    var foundChanges = 0, possibleChanges = 0;
+    var localChanges = _.compact([getLocalTagChange($n1, $n2)]);
+    var childChanges = compareChildren($n1, $n2, options);
+    var diffLevel = tagComparisonHeuristic($n1, $n2, childChanges);
 
-    // if the tags have different names, they're not very similar
-    possibleChanges++;
+    if (diffLevel == DiffLevel.IDENTICAL) {
+      return false;
+    } else {
+      return { level: diffLevel, changes: localChanges.concat(childChanges) }
+    }
+  }
+
+  // Checks whether there are "local" changes between the two tags - differing tag name or attributes.
+  // Changes in content are considered "child" changes and are not taken into account here.
+  function getLocalTagChange($n1, $n2) {
+    var different = false;
+
+    // same tag name?
     if ($n1[0].name != $n2[0].name) {
-      changes.push(changeTypes.changed($n1, $n2));
-      foundChanges++;
+      return changeTypes.changed($n1, $n2);
     }
 
-    // they should have the same attributes too
+    // same attributes?
     var attributesOnNode1 = _.keys($n1[0].attribs);
     var attributesOnNode2 = _.keys($n2[0].attribs);
-    var attributes = _.uniq(attributesOnNode1.concat(attributesOnNode2));
-    possibleChanges += attributes.length;
+    var allAttributes = _.uniq(attributesOnNode1.concat(attributesOnNode2));
 
-    _.map(attributes, function (attribute) {
+    var attributesDiffer = _.any(allAttributes, function (attribute) {
       var value1 = canonicalizeAttribute($n1[0].attribs[attribute]);
       var value2 = canonicalizeAttribute($n2[0].attribs[attribute]);
-      if (value1 != value2) {
-        foundChanges++;
-        if (!changes.length) {
-          changes.push(changeTypes.changed($n1, $n2));
-        }
-      }
+      return (value1 != value2);
     });
+    if (attributesDiffer) {
+      return changeTypes.changed($n1, $n2);
+    }
 
-    // we compare the children too, and return all the changes aggregated
-    possibleChanges += _.max([$n1.contents().length, $n2.contents().length]);
-    var childChanges = compareChildren($n1, $n2, options);
-    changes = changes.concat(childChanges);
-
-    _.each(childChanges, function(change) {
-      if (change.in == $n1 || change.in == $n2) {
-        switch(change.type) {
-          case 'added':
-          case 'removed':
-            foundChanges += 0.5;
-            break;
-          default:
-            foundChanges += 1;
-        }
-      }
-    });
-
-    // no changes?
-    if (!changes.length)
-      return false;
-
-    // determine similarity to find out if this is the same node, or completely different
-    var similarity = 1.0 - (foundChanges / possibleChanges);
-    var level = (similarity < 0.51) ? DiffLevel.NOT_THE_SAME_NODE : DiffLevel.SAME_BUT_DIFFERENT;
-    return {
-      level: level,
-      changes: changes
-    };
+    // no changes found
+    return false;
   }
 
   function compareChildren($n1, $n2, options) {

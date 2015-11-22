@@ -13,8 +13,9 @@ module.exports = {
   changedText: changed,
 
   DiffLevel: {
-    SAME_BUT_DIFFERENT: 'same_but_different',
-    NOT_THE_SAME_NODE: 'not_the_same_node'
+    SAME_BUT_DIFFERENT: 'same-but-different',
+    NOT_THE_SAME_NODE: 'not-the-same-node',
+    IDENTICAL: 'identical'
   }
 };
 
