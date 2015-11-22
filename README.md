@@ -30,7 +30,7 @@ It produces better results on HTML than the standard text-based diff because it 
 
 Compares `oldHTMLString` to `newHTMLString` and returns an object of the following shape:
 
-```javascript
+```
 {
   different: <boolean> 
   changes: [<change>, <change>, ...] // for details on change objects, see below
