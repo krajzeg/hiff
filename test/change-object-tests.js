@@ -294,4 +294,15 @@ describe("Change objects", function() {
     assert.equal(ch.before.parentPath, ":root");
     assert.equal(ch.after.parentPath, ":root");
   });
+
+  it("should give correct paths even when the parent node changes", function() {
+    var html1 = "<div id='hi'><a>1</a></div>";
+    var html2 = "<section id='hi'><a>1</a><b>2</b></section>";
+    var d = hiff.compare(html1, html2);
+    var $1 = d.$before, $2 = d.$after, ch = _.where(d.changes, {type: 'added'})[0];
+
+    assert.equal(ch.before.parentPath, 'div#hi');
+    assert.equal(ch.after.parentPath, 'section#hi');
+    assert.equal(ch.after.path, 'section#hi > b');
+  });
 });
