@@ -102,8 +102,8 @@ describe("Change objects", function() {
   });
 
   it("should be valid for changes in text nodes", function() {
-    var html1 = "<div class='test'><a>A</a><i>Yes.</i><b>B</b></div>";
-    var html2 = "<div class='test'><a>A</a><i>No..</i><b>B</b></div>";
+    var html1 = "<div class='test'><a>A</a><i class='change'>Yes.</i><b>B</b></div>";
+    var html2 = "<div class='test'><a>A</a><i class='change'>No..</i><b>B</b></div>";
     var d = hiff.compare(html1, html2);
 
     var change = d.changes[0];
@@ -115,7 +115,7 @@ describe("Change objects", function() {
     var before = change.before, after = change.after;
 
     assert.strictEqual(before.path, undefined); // undefined since it's impossible to point to a text node
-    assert.equal(before.parentPath, "div.test > i");
+    assert.equal(before.parentPath, "div.test > i.change");
     assert.equal(before.index, 0);
 
     assert(before.$node.is($1('i').contents()[0]));
@@ -124,7 +124,7 @@ describe("Change objects", function() {
     assert(!before.$next);
 
     assert.equal(after.path,undefined);
-    assert.equal(after.parentPath, "div.test > i");
+    assert.equal(after.parentPath, "div.test > i.change");
     assert.equal(after.index, 0);
 
     assert(after.$node.is($2('i').contents()[0]));

@@ -1,6 +1,6 @@
 var compare = require('../src/hiff').compare;
 var assert = require('chai').assert;
-
+var _ = require('underscore');
 
 describe("Ignoring nodes", function () {
   it("should work for class selectors", function () {
@@ -17,17 +17,19 @@ describe("Ignoring text", function() {
   });
 
   it("should work for a list of selectors", function() {
-    var html1 = "<a>Ignored.</a>  <b>Compared.</b> <i class='nope'>Ignored.</i>";
-    var html2 = "<a>Or is it?</a> <b>Indeed...</b> <i class='nope'>Or is it?</i>";
+    var html1 = "<a>Ignored.</a>  <b>Compared.</b> <i>Ignored.</i>";
+    var html2 = "<a>Or is it?</a> <b>Indeed...</b> <i>Or is it?</i>";
 
     var d = compare(html1, html2, {
-      ignoreText: ['a', '.nope']
+      ignoreText: ['a', 'i']
     });
 
-    // we expect one change, only from the <b>
+    // we expect two changes, the removal of old <b> and addition of a new one
     assert.ok(d.different);
-    assert.lengthOf(d.changes, 1);
-    assert.ok(d.changes[0].oldNode.parent().is('b'));
+    assert.lengthOf(d.changes, 2);
+    assert.ok(_.all(d.changes, function(c) {
+      return c.before.path == 'b' || c.after.path == 'b';
+    }));
   });
 
   it("should interpret 'true' to mean 'ignore content of all text nodes'", function() {

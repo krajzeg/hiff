@@ -7,61 +7,89 @@ var canonicalizeAttribute = require('../util/cheerio-utils').canonicalizeAttribu
 
 module.exports = createHeuristic;
 
+var HEURISTIC_VALUES = {
+  tag:          {same: +10, differs: -10},
+  id:           {same: +35, differs: -15},
+  attributes:   {same: +12, differs: -12},
+  contents:     {same: +11, differs: -11}
+};
+
 function createHeuristic(options) {
   return heuristic;
 
   function heuristic($n1, $n2, childChanges) {
-    var foundChanges = 0, possibleChanges = 0;
-
-    // this flag will be set to true if we're at least SAME_BUT_DIFFERENT
+    // this flag will be set to true if we've discovered any changes
+    // local to the node
     var different = false;
+    var similarity = 0;
 
-    // if the tags have different names, they're not very similar
-    possibleChanges++;
-    if ($n1[0].name != $n2[0].name) {
-      different = true;
-      foundChanges++;
-    }
+    // check the tag names
+    var tagsDiffer = ($n1[0].name != $n2[0].name);
+    different = different || tagsDiffer;
+    similarity += componentResult('tag', tagsDiffer);
 
-    // they should have the same attributes too
+    // we'll work with attributes now
     var attributesOnNode1 = _.keys($n1[0].attribs);
     var attributesOnNode2 = _.keys($n2[0].attribs);
     var attributes = _.uniq(attributesOnNode1.concat(attributesOnNode2));
-    possibleChanges += attributes.length;
 
-    _.map(attributes, function (attribute) {
-      var value1 = canonicalizeAttribute($n1[0].attribs[attribute]);
-      var value2 = canonicalizeAttribute($n2[0].attribs[attribute]);
-      if (value1 != value2) {
-        foundChanges++;
-        different = true;
-      }
-    });
+    // ID has it's own separate handling due to its importance in IDentifying nodes
+    // basically, we treat it as a "super-attribute" in terms of checking if nodes are the same
+    if (attributes.indexOf('id') >= 0) {
+      attributes.splice(attributes.indexOf('id'), 1); // don't compare it with other attributes
+      var idsDiffer = attributeValuesDiffer($n1[0].attribs['id'], $n2[0].attribs['id']);
+      different = different || idsDiffer;
+      similarity += componentResult('id', idsDiffer);
+    }
 
-    // we compare the children too, and return all the changes aggregated
-    possibleChanges += _.max([$n1.contents().length, $n2.contents().length]);
-    _.each(childChanges, function(change) {
-      if (change.in == $n1 || change.in == $n2) {
-        switch(change.type) {
-          case 'added':
-          case 'removed':
-            foundChanges += 0.5;
-            break;
-          default:
-            foundChanges += 1;
+    // other attributes are treated as an aggregate
+    // if at least 50% are the same, we treat them as matching
+    if (attributes.length) {
+      var differentAttribs = _.filter(attributes, function (attr) {
+        return attributeValuesDiffer($n1[0].attribs[attr], $n2[0].attribs[attr]);
+      });
+      var differentAttribRatio = differentAttribs.length / attributes.length;
+      var attributesDifferSignificantly = differentAttribRatio > 0.5;
+      different = different || (differentAttribs.length > 0);
+      similarity += componentResult('attributes', attributesDifferSignificantly);
+    }
+
+    // finally, if the contents are at least 50% different
+    // we treat this as a significant difference
+    var possibleChildChanges = _.max([$n1.contents().length, $n2.contents().length]);
+    if (possibleChildChanges > 0) {
+      var totalChildChanges;
+      var found = {added: 0, removed: 0, changed: 0};
+      _.each(childChanges, function (change) {
+        if (change.before.$parent.is($n1) || change.after.$parent.is($n2)) {
+          found[change.type]++;
         }
-      }
-    });
-    if (childChanges.length > 0) {
-      different = true;
+      });
+
+      // adds/removals 'cancel' each other to handle single changes generating an add/remove
+      totalChildChanges = _.max([found.added, found.removed]) + found.changed;
+
+      var contentsDifferSignificantly = (totalChildChanges / possibleChildChanges) > 0.5;
+      different = different || (childChanges.length > 0);
+      similarity += componentResult('contents', contentsDifferSignificantly);
     }
 
     // no changes?
-    if (!different)
+    if (!different) {
       return DiffLevel.IDENTICAL;
+    } else {
+      // some changes, the accumulated 'result' decides whether it's still the same node
+      return (similarity >= 0) ? DiffLevel.SAME_BUT_DIFFERENT : DiffLevel.NOT_THE_SAME_NODE;
+    }
+  }
 
-    // if we're different, determine similarity to find out if this is the same node, or completely different
-    var similarity = 1.0 - (foundChanges / possibleChanges);
-    return (similarity < 0.51) ? DiffLevel.NOT_THE_SAME_NODE : DiffLevel.SAME_BUT_DIFFERENT;
+  function attributeValuesDiffer(value1, value2) {
+    value1 = canonicalizeAttribute(value1);
+    value2 = canonicalizeAttribute(value2);
+    return value1 != value2;
+  }
+
+  function componentResult(component, isDifferent) {
+    return HEURISTIC_VALUES[component][isDifferent ? 'differs' : 'same'];
   }
 }
