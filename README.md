@@ -30,7 +30,7 @@ It produces better results on HTML than the standard text-based diff because it 
 
 Compares `oldHTMLString` to `newHTMLString` and returns an object of the following shape:
 
-```
+```javascript
 {
   different: <boolean> 
   changes: [<change>, <change>, ...] // for details on change objects, see below
@@ -51,6 +51,7 @@ The `options` argument is not required, but it allows you to influence how the c
 * **ignoreComments** (default: true) - if true, comments will be stripped from both pieces of HTML before looking for changes, effectively ignoring them completely.
 * **ignore** (default: []) - a list of JQuery selectors for nodes that you want to ignore when comparing, e.g. `['.ad', 'div[ignore="true"]']`. All changes to the attributes or contents of nodes matching the selectors will be ignored.
 * **ignoreText** (default: []) - a list of selectors for nodes whose text content you want to ignore. This will only ignore changes to existing text - structural changes like adding a new text node where there wasn't any will still be reported. You can also set this option to `true` to ignore content of *all* text nodes.
+* **tagComparison** - used to tweak the comparison logic, see "Advanced configuration" below
 
 ### Change objects
 
@@ -68,5 +69,45 @@ The **before** and **after** objects share the same format and let you pinpoint 
 * **path** - a CSS selector for the node that was changed/added/removed. If the changed node was a text node, a comment or a directive (like <!DOCTYPE>), this property will be `undefined`. These types of nodes cannot be selected with CSS selectors, unfortunately. If it is provided, `$(change.before.path)` should always be the same as `change.before.$node` (and likewise for **after**).
 * **parentPath** - a CSS selector for the parent of the changed/added/removed node. Unlike **path**, this property is always available - the parent is always an element node.
 * **index** - the child index of the changed node. This index is calculated including text nodes, comment nodes, etc. This means that `change.before.$parent.contents()[change.before.index]` will give you the correct, but using `.children()` won't, as that property only includes element nodes. This property will be provided even if the node doesn't exist in the specific DOM (added nodes don't exist **before**, and removed nodes **after**) - in that case it will point to the index at which the node would be if it _was_ in the DOM in question.
+
+## Advanced configuration
+
+Hiff uses heuristics to guess whether a node is unchanged, edited, or completely replaced with a new one. This can be the difference between one "changed" in your diff (if the nodes in the old and new DOM are still deemed to be similar enough) and an "added"/"removed" pair (if hiff guesses they're not the same node).
+
+The defaults should do OK in most situations, but you can influence the weights the heuristic uses with a `tagComparison` option:
+
+```javascript
+hiff.compare(html1, html2, {
+    tagComparison: {name: 1, id: 1, attributes: 0, contents: 0}
+});
+```
+
+This lets you influence the weights (relative to defaults) that Hiff will give to each of the four components when comparing tags: the **name** of the tag, the **id** attribute (which is treated separately from other attributes as important for identifying nodes), other **attributes**, and the **contents** of the tag (children and text). The default settings is `1` for each property. Setting it to a higher number will make this component more important, and to a lower number - less important. Setting it to 0 will make Hiff **completely ignore** the given component.
+
+As a convenience you can also set a property to `false` with the same meaning as 0. If you don't provide all of them, only the
+ones you specify will be changed, for example:
+
+```javascript
+// this will make Hiff treat <div>Blah</div> and <section>Blah</section> as identical
+hiff.compare(html1, html2, {name: false}); 
+```
+
+### Custom comparators
+
+_Here be dragons - don't do this unless there is no other way._ If there is no other way around your specific needs and the default heuristic fails you, you can provide your custom comparator function like this:
+
+```javascript
+hiff.compare(html1, html2, {tagComparison: comparatorFn});
+function comparatorFn($n1, $n2, childChanges) {
+  if ($n1.is("[magic]") && $n2.is("[magic]"))
+    return ($n1.attr('magic') == $n2.attr('magic')) ? hiff.IDENTICAL : hiff.NOT_THE_SAME_NODE;
+  else
+    return hiff.defaultTagComparisonFn($n1, $n2, childChanges);
+}
+```
+
+Your function will get two [cheerio][cheerio] nodes to be compared, and a list of changes for the tag's children (as an array of Hiff change objects). You can use those to decide whether the node should be treated as identical (return `hiff.IDENTICAL`), the same node with edits (return `hiff.SAME_BUT_DIFFERENT`), or completely different (return `hiff.NOT_THE_SAME_NODE`).
+
+You can use `hiff.defaultTagComparisonFn` to only override a part of the normal logic and use the standard comparison for everything else, like in the example above.
 
 [cheerio]: https://github.com/cheeriojs/cheerio
