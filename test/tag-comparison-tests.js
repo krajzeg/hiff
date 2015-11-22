@@ -8,7 +8,7 @@ function removedOrAdded(changes, path) {
   });
 }
 
-describe("Default similarity heuristic", function () {
+describe("Default tag comparator", function () {
   it("should report node as similar if just the ID matches but everything else changes", function() {
     var html1 = "<div id='itsme'>A</div>";
     var html2 = "<section id='itsme' class='selected'>B</section>";

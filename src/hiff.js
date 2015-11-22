@@ -6,6 +6,8 @@ var compareNodes = require('./diffing/compare-nodes');
 var prepareForDiff = require('./diffing/prepare-for-diff');
 var changeTypes = require('./diffing/change-types');
 
+var createTagHeuristic = require('./diffing/tag-comparison-heuristic');
+
 module.exports = {
   compare: compare,
 
@@ -82,6 +84,7 @@ function prepareOptions(options) {
   if (options.ignoreText === true) {
     options.ignoreText = ['*'];
   }
+  options.tagComparison = prepareTagHeuristic(options.tagComparison);
 
   // sanitize lists
   ['ignore', 'ignoreText'].map(function(name) {
@@ -93,6 +96,19 @@ function prepareOptions(options) {
 
   // return the new object
   return options;
+}
+
+// Prepares the tag comparison heuristic based on the option.
+function prepareTagHeuristic(tagComparison) {
+  if (typeof tagComparison === 'undefined') {
+    return createTagHeuristic(); // default heuristic
+  } else if (typeof tagComparison === 'function') {
+    return tagComparison; // custom, user-provided function
+  } else if (typeof tagComparison === 'object') {
+    return createTagHeuristic(tagComparison); // options for the default heuristic
+  } else {
+    throw new Error("Invalid 'tagComparison' option provided: " + tagComparison);
+  }
 }
 
 // Ensures that the value of an option is an array, turning other values into single-element

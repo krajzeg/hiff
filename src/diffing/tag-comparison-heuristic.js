@@ -7,14 +7,23 @@ var canonicalizeAttribute = require('../util/cheerio-utils').canonicalizeAttribu
 
 module.exports = createHeuristic;
 
-var HEURISTIC_VALUES = {
-  tag:          {same: +10, differs: -10},
+var HEURISTIC_WEIGHTS = {
+  name:         {same: +10, differs: -10},
   id:           {same: +35, differs: -15},
   attributes:   {same: +12, differs: -12},
   contents:     {same: +11, differs: -11}
 };
+var DEFAULT_OPTIONS = {
+  name: 1.0, id: 1.0, attributes: 1.0, contents: 1.0 // weight multipliers
+};
 
-function createHeuristic(options) {
+function createHeuristic(weights) {
+  weights = _.defaults(weights || {}, DEFAULT_OPTIONS);
+  _.each(weights, function(weight, key) {
+    if (weight === false) weights[key] = 0;
+    if (weight === true) weights[key] = 1;
+  });
+
   return heuristic;
 
   function heuristic($n1, $n2, childChanges) {
@@ -25,8 +34,8 @@ function createHeuristic(options) {
 
     // check the tag names
     var tagsDiffer = ($n1[0].name != $n2[0].name);
-    different = different || tagsDiffer;
-    similarity += componentResult('tag', tagsDiffer);
+    different = different || (tagsDiffer && (weights.name > 0));
+    similarity += componentResult('name', tagsDiffer);
 
     // we'll work with attributes now
     var attributesOnNode1 = _.keys($n1[0].attribs);
@@ -38,7 +47,7 @@ function createHeuristic(options) {
     if (attributes.indexOf('id') >= 0) {
       attributes.splice(attributes.indexOf('id'), 1); // don't compare it with other attributes
       var idsDiffer = attributeValuesDiffer($n1[0].attribs['id'], $n2[0].attribs['id']);
-      different = different || idsDiffer;
+      different = different || (idsDiffer && (weights.id > 0));
       similarity += componentResult('id', idsDiffer);
     }
 
@@ -50,7 +59,7 @@ function createHeuristic(options) {
       });
       var differentAttribRatio = differentAttribs.length / attributes.length;
       var attributesDifferSignificantly = differentAttribRatio > 0.5;
-      different = different || (differentAttribs.length > 0);
+      different = different || ((differentAttribs.length > 0) && (weights.attributes > 0));
       similarity += componentResult('attributes', attributesDifferSignificantly);
     }
 
@@ -70,7 +79,7 @@ function createHeuristic(options) {
       totalChildChanges = _.max([found.added, found.removed]) + found.changed;
 
       var contentsDifferSignificantly = (totalChildChanges / possibleChildChanges) > 0.5;
-      different = different || (childChanges.length > 0);
+      different = different || ((childChanges.length > 0) && (weights.contents > 0));
       similarity += componentResult('contents', contentsDifferSignificantly);
     }
 
@@ -90,6 +99,6 @@ function createHeuristic(options) {
   }
 
   function componentResult(component, isDifferent) {
-    return HEURISTIC_VALUES[component][isDifferent ? 'differs' : 'same'];
+    return HEURISTIC_WEIGHTS[component][isDifferent ? 'differs' : 'same'] * weights[component];
   }
 }

@@ -5,7 +5,6 @@ var canonicalizeText = require('../util/cheerio-utils').canonicalizeText;
 var canonicalizeAttribute = require('../util/cheerio-utils').canonicalizeAttribute;
 var nodeType = require('../util/cheerio-utils').nodeType;
 var changeTypes = require('./change-types');
-var tagComparisonHeuristic = require('./tag-comparison-heuristic')();
 
 module.exports = compareNodes;
 
@@ -53,7 +52,7 @@ function compareNodes($n1, $n2, options) {
     // compare the nodes using logic specific to their type
     switch (type1) {
       case 'text': return compareTextNodes($n1, $n2, options.ignoreText);
-      case 'element': return compareTags($n1, $n2);
+      case 'element': return compareTags($n1, $n2, options.tagComparison);
       case 'directive':
       case 'comment':
         return compareOuterHTML($n1, $n2);
@@ -63,10 +62,10 @@ function compareNodes($n1, $n2, options) {
   }
 
   // Compares tags using a heuristic provided from outside.
-  function compareTags($n1, $n2) {
+  function compareTags($n1, $n2, heuristic) {
     var localChanges = _.compact([getLocalTagChange($n1, $n2)]);
     var childChanges = compareChildren($n1, $n2, options);
-    var diffLevel = tagComparisonHeuristic($n1, $n2, childChanges);
+    var diffLevel = heuristic($n1, $n2, childChanges);
 
     if (diffLevel == DiffLevel.IDENTICAL) {
       return false;
