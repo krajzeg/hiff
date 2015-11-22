@@ -15,6 +15,13 @@ module.exports = {
   removed: changeTypes.removed,
   changed: changeTypes.changed,
 
+  // constants and functions for use with custom comparators
+  IDENTICAL: changeTypes.DiffLevel.IDENTICAL,
+  SAME_BUT_DIFFERENT: changeTypes.DiffLevel.SAME_BUT_DIFFERENT,
+  NOT_THE_SAME_NODE: changeTypes.DiffLevel.NOT_THE_SAME_NODE,
+
+  defaultTagComparisonFn: createTagHeuristic(),
+
   // legacy method, only for 0.2.x compatibility
   diff: diff
 };
