@@ -26,7 +26,12 @@ describe("Tag comparison configuration", function() {
       var html1 = "<div>1</div>";
       var html2 = "<div>2</div>";
       var d = hiff.compare(html1, html2, {tagComparison: {contents: false}});
-      assert.ok(!d.different);
+
+      // this is tricky - there will still be a change, but it will be to the text node
+      // inside only - the <div> won't be considered to have changed
+      assert.ok(d.different);
+      assert.lengthOf(d.changes, 1);
+      assert(d.changes[0].before.$node.is(d.$before('div').contents()[0]));
     });
   });
 

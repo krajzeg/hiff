@@ -78,8 +78,8 @@ function createHeuristic(weights) {
       // adds/removals 'cancel' each other to handle single changes generating an add/remove
       totalChildChanges = _.max([found.added, found.removed]) + found.changed;
 
-      var contentsDifferSignificantly = (totalChildChanges / possibleChildChanges) > 0.5;
-      different = different || ((childChanges.length > 0) && (weights.contents > 0));
+      var contentsDifferSignificantly = (totalChildChanges / possibleChildChanges) > 0.99;
+      different = different || (childChanges.length > 0);
       similarity += componentResult('contents', contentsDifferSignificantly);
     }
 

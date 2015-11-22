@@ -59,24 +59,24 @@ describe("Default tag comparator", function () {
     assert(removedOrAdded(d.changes, 'a.button'), "The <a> did not generate an add/remove change.");
   });
 
-  it("should report nodes as similar when contents are >=50% similar", function () {
+  it("should report nodes as similar when contents have at least one node in common", function () {
     var html1 = "<div><b>same</b><b>same</b><b>nope</b><b>nah</b></div>";
-    var html2 = "<div><b>same</b><b>same</b><i>yep</i><i>yeah</i></div>";
+    var html2 = "<div><b>same</b><p>different</p><i>yep</i><i>yeah</i></div>";
     var d = hiff.compare(html1, html2);
     assert.ok(d.different);
 
-    // two adds, two removals, individually for the children
-    assert.lengthOf(_.where(d.changes, {type: 'added'}), 2);
-    assert.lengthOf(_.where(d.changes, {type: 'removed'}), 2);
+    // 3 additions, 3 removals, individually for the children
+    assert.lengthOf(_.where(d.changes, {type: 'added'}), 3);
+    assert.lengthOf(_.where(d.changes, {type: 'removed'}), 3);
   });
 
-  it("should report nodes as different when contents are <50% similar", function () {
+  it("should report nodes as different when contents have no nodes in common", function () {
     var html1 = "<div><b>same</b><b>nope</b><b>nah</b><b>nein</b></div>";
-    var html2 = "<div><b>same</b><i>yep</i><i>yeah</i><i>ja</i></div>";
+    var html2 = "<div><b>differ</b><i>yep</i><i>yeah</i><i>ja</i></div>";
     var d = hiff.compare(html1, html2);
     assert(d.different);
 
-    // one add, one removal in this case- for the whole <div>
+    // one add, one removal in this case - for the whole <div>
     assert.lengthOf(_.where(d.changes, {type: 'added'}), 1);
     assert.lengthOf(_.where(d.changes, {type: 'removed'}), 1);
   });
