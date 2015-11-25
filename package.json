@@ -4,7 +4,8 @@
   "description": "Diffing module that understands HTML and gives semantic information about what was changed.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha test/**/*-tests.js"
+    "test": "node node_modules/mocha/bin/mocha --recursive",
+    "coverage": "node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- --recursive"
   },
   "keywords": [
     "diff",
@@ -18,6 +19,8 @@
   "license": "zlib",
   "devDependencies": {
     "chai": "^3.4.1",
+    "coveralls": "^2.11.4",
+    "istanbul": "^0.4.1",
     "jshint": "^2.6.0",
     "mocha": "^2.3.4",
     "q-io": "^1.13.1"
