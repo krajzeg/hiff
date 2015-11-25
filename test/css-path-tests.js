@@ -58,7 +58,7 @@ describe("nodePath()", function() {
   });
 
   it("should produce paths that can be fed back to $()", function(done) {
-    fs.read(path.join(__dirname, "inputs/path-roundtrip-test.html")).then(function(html) {
+    fs.read(path.join(__dirname, "fixtures/path-roundtrip-test.html")).then(function(html) {
       var $ = cheerio.load(html);
 
       // check if CSS paths roundtrip correctly for all nodes
