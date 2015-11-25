@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
 var _ = require('underscore');
-var hiff = require('../src/hiff');
+var hiff = require('../');
 
 describe("Tag comparison configuration", function() {
   describe("should let you ignore", function() {

@@ -1,4 +1,4 @@
-var compare = require('../src/hiff').compare;
+var compare = require('../').compare;
 var assert = require('chai').assert;
 
 function noChange(html1, html2) {

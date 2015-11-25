@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
 var _ = require('underscore');
-var hiff = require('../src/hiff');
+var hiff = require('../');
 
 function removedOrAdded(changes, path) {
   return _.any(changes, function(c) {

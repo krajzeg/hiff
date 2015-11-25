@@ -1,6 +1,6 @@
 var cheerio = require('cheerio');
 var assert = require('chai').assert;
-var nodeType = require('../src/util/cheerio-utils').nodeType;
+var nodeType = require('../lib/util/cheerio-utils').nodeType;
 
 function checkType(html, expectedType) {
   var $ = cheerio.load(html);

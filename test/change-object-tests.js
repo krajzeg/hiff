@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var assert = require('chai').assert;
-var hiff = require('../src/hiff');
+var hiff = require('../');
 
 describe("Change objects", function() {
 

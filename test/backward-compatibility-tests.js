@@ -1,4 +1,4 @@
-var legacyDiff = require('../src/hiff').diff;
+var legacyDiff = require('../').diff;
 var assert = require('chai').assert;
 var _ = require('underscore');
 
