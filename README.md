@@ -1,6 +1,6 @@
 # Hiff - the diff that understands HTML
 
-[![Build Status](https://travis-ci.org/krajzeg/hiff.svg?branch=next)](https://travis-ci.org/krajzeg/hiff) [![Coverage Status](https://coveralls.io/repos/krajzeg/hiff/badge.svg?branch=next&service=github)](https://coveralls.io/github/krajzeg/hiff?branch=next) [![Dependency Status](https://david-dm.org/krajzeg/hiff.svg)] 
+[![Build Status](https://travis-ci.org/krajzeg/hiff.svg?branch=next)](https://travis-ci.org/krajzeg/hiff) [![Coverage Status](https://coveralls.io/repos/krajzeg/hiff/badge.svg?branch=next&service=github)](https://coveralls.io/github/krajzeg/hiff?branch=next) [![Dependency Status](https://david-dm.org/krajzeg/hiff.svg)](https://david-dm.org/krajzeg/hiff)
 
 Hiff is a small module that can take two pieces of HTML, compare them against each other, and return a complete list of differences between the two - ignoring things like attribute order or insignificant whitespace that don't influence semantics. Basically, if it would render the same in a browser, it'll compare as equal.
 
