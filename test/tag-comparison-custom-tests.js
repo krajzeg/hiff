@@ -1,5 +1,5 @@
 var assert = require('chai').assert;
-var _ = require('underscore');
+var _ = require('lodash');
 var hiff = require('../');
 
 describe("Custom tag comparators", function() {

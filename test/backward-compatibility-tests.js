@@ -1,6 +1,6 @@
 var legacyDiff = require('../').diff;
 var assert = require('chai').assert;
-var _ = require('underscore');
+var _ = require('lodash');
 
 describe("Legacy diff() method", function () {
   it("should return just the changes when there are some", function() {

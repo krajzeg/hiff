@@ -1,6 +1,6 @@
 var compare = require('../').compare;
 var assert = require('chai').assert;
-var _ = require('underscore');
+var _ = require('lodash');
 
 describe("Ignoring nodes", function () {
   it("should work for class selectors", function () {

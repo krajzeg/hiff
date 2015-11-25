@@ -1,7 +1,7 @@
 var compare = require('../').compare;
 var assert = require('chai').assert;
 var fs = require('fs');
-var _ = require('underscore');
+var _ = require('lodash');
 var path = require('path');
 
 function compareFixtures(file1, file2, options) {

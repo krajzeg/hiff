@@ -4,7 +4,7 @@ var cssPath = require('../lib/util/css-path');
 var assert = require('chai').assert;
 var fs = require('q-io/fs');
 var path = require('path');
-var _ = require('underscore');
+var _ = require('lodash');
 
 describe("nodePath()", function() {
   it("should prefer to identify elements by ID", function() {

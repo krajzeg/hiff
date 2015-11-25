@@ -1,5 +1,5 @@
 var assert = require('chai').assert;
-var _ = require('underscore');
+var _ = require('lodash');
 var hiff = require('../');
 
 function removedOrAdded(changes, path) {
