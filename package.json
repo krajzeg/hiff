@@ -16,7 +16,7 @@
   ],
   "repository": "krajzeg/hiff",
   "author": "Jakub Wasilewski <wasyl@wasyl.eu>",
-  "license": "zlib",
+  "license": "Zlib",
   "devDependencies": {
     "chai": "^3.4.1",
     "coveralls": "^2.11.4",
