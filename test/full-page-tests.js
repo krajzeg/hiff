@@ -47,6 +47,6 @@ describe("Hiff", function () {
     assert(_.all(d.changes, function(c) {
       return c.after.$node.is('p');
     }), "Some changes were concerning non-<p> nodes.");
-  })
+  });
 });
 
