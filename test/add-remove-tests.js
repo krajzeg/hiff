@@ -70,7 +70,9 @@ describe("Multiple additions/removals", function() {
     assert.ok(diff.different);
     var changeTypes = _.pluck(diff.changes, 'type');
     assert.deepEqual(changeTypes, ['added', 'removed', 'added', 'added', 'added']);
-    var tags = _.chain(diff.changes).pluck('node').pluck(0).pluck('name').value();
+    var tags = _.map(diff.changes, function(c) {
+      return (c.before.$node || c.after.$node)[0].name;
+    });
     assert.deepEqual(tags, ['a', 'br', 'strong', 'em', 'em']);
   });
 });
