@@ -18,7 +18,7 @@ if [ -n "$(git diff HEAD --name-only | grep public/)" ]; then
 fi
 
 # Run jshint
-JSHINT_DIRS="src test"
+JSHINT_DIRS="lib test"
 echo -n "Running jshint..."
 JSHINT_OUT=`./node_modules/jshint/bin/jshint $JSHINT_DIRS`
 echo -e "done.\n"
