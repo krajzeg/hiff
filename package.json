@@ -4,8 +4,8 @@
   "description": "Diffing module that understands HTML and gives semantic information about what was changed.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha --recursive",
-    "coverage": "nyc node_modules/mocha/bin/_mocha -- --recursive"
+    "test": "nyc mocha --recursive",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "keywords": [
     "diff",
