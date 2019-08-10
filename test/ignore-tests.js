@@ -27,7 +27,7 @@ describe("Ignoring text", function() {
     // we expect two changes, the removal of old <b> and addition of a new one
     assert.ok(d.different);
     assert.lengthOf(d.changes, 2);
-    assert.ok(_.all(d.changes, function(c) {
+    assert.ok(_.every(d.changes, function(c) {
       return c.before.path == 'b' || c.after.path == 'b';
     }));
   });

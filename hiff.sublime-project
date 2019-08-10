@@ -1,0 +1,15 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+      "folder_exclude_patterns": ["node_modules"],
+      "name":"hiff"
+		}
+	],
+  "settings": {
+    "SublimeLinter.linters.jshint.disable": true,
+    "SublimeLinter.linters.eslint.disable": true,
+    "SublimeLinter.linters.json.excludes": ["package-lock.json"],
+  }
+}

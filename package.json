@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha --recursive",
-    "coverage": "node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- --recursive"
+    "coverage": "nyc node_modules/mocha/bin/_mocha -- --recursive"
   },
   "keywords": [
     "diff",
@@ -20,15 +20,15 @@
   "devDependencies": {
     "chai": "^3.4.1",
     "coveralls": "^2.11.4",
-    "istanbul": "^0.4.1",
     "jshint": "^2.6.0",
     "mocha": "^2.3.4",
+    "nyc": "^14.1.1",
     "q-io": "^1.13.1"
   },
   "dependencies": {
-    "cheerio": "0.19.0",
+    "cheerio": "0.22.0",
     "colors": "1.1.2",
     "diff": "2.2.1",
-    "lodash": "3.10.1"
+    "lodash": "4.17.15"
   }
 }
