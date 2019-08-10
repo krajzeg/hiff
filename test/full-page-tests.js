@@ -37,14 +37,14 @@ describe("Hiff", function () {
              (c.after.$node && c.after.$node.is('article'));
     });
     assert.lengthOf(articleChanges, 4);
-    assert(_.all(articleChanges, {type: 'changed'}), "There were additions/removals for <article> tags.");
+    assert(_.every(articleChanges, {type: 'changed'}), "There were additions/removals for <article> tags.");
   });
 
   it("paragraph soups with no classes or IDs", function() {
     var d = compareFixtures("paragraph-soup-before.html", "paragraph-soup-after.html");
     assert.ok(d.different);
-    assert(_.all(d.changes, {type: 'added'}), "There were non-addition changes.");
-    assert(_.all(d.changes, function(c) {
+    assert(_.every(d.changes, {type: 'added'}), "There were non-addition changes.");
+    assert(_.every(d.changes, function(c) {
       return c.after.$node.is('p');
     }), "Some changes were concerning non-<p> nodes.");
   });

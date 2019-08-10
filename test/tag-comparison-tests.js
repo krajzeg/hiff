@@ -3,7 +3,7 @@ var _ = require('lodash');
 var hiff = require('../');
 
 function removedOrAdded(changes, path) {
-  return _.any(changes, function(c) {
+  return _.some(changes, function(c) {
     return (c.type == 'added' || c.type == 'removed') && (c.before.path == path || c.after.path == path);
   });
 }
@@ -66,8 +66,8 @@ describe("Default tag comparator", function () {
     assert.ok(d.different);
 
     // 3 additions, 3 removals, individually for the children
-    assert.lengthOf(_.where(d.changes, {type: 'added'}), 3);
-    assert.lengthOf(_.where(d.changes, {type: 'removed'}), 3);
+    assert.lengthOf(_.filter(d.changes, {type: 'added'}), 3);
+    assert.lengthOf(_.filter(d.changes, {type: 'removed'}), 3);
   });
 
   it("should report nodes as different when contents have no nodes in common", function () {
@@ -77,8 +77,8 @@ describe("Default tag comparator", function () {
     assert(d.different);
 
     // one add, one removal in this case - for the whole <div>
-    assert.lengthOf(_.where(d.changes, {type: 'added'}), 1);
-    assert.lengthOf(_.where(d.changes, {type: 'removed'}), 1);
+    assert.lengthOf(_.filter(d.changes, {type: 'added'}), 1);
+    assert.lengthOf(_.filter(d.changes, {type: 'removed'}), 1);
   });
 
   it("should report empty node and node with different tag and some content as different", function () {

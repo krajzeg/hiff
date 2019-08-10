@@ -68,7 +68,7 @@ describe("Multiple additions/removals", function() {
     var html2 = "<div id='multi'> <a>added</a> <b>1</b> <i>2</i> <strong>Hello</strong> <em>Hi!</em> <p>3</p> <b>4</b> <a>5</a> <em>Done.</em></div>";
     var diff = hiff.compare(html1, html2);
     assert.ok(diff.different);
-    var changeTypes = _.pluck(diff.changes, 'type');
+    var changeTypes = _.map(diff.changes, 'type');
     assert.deepEqual(changeTypes, ['added', 'removed', 'added', 'added', 'added']);
     var tags = _.map(diff.changes, function(c) {
       return (c.before.$node || c.after.$node)[0].name;
