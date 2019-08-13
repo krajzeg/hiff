@@ -1,6 +1,6 @@
 {
   "name": "hiff",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Diffing module that understands HTML and gives semantic information about what was changed.",
   "main": "lib/index.js",
   "scripts": {
